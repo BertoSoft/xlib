@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/XKBlib.h>     // Para usar xkbKeycodeToKeysyn
+
 
 #include "ui.h"
 
@@ -16,6 +18,7 @@ int main(){
     // Iniciamods la Xlib
     //
     initUi();
+    initControls();
 
     //
     // Inicializamos los valores
@@ -24,8 +27,8 @@ int main(){
     opt_funcion     = 0;
 
     while(1){
-        XNextEvent(dpy, &ev);
 
+        XNextEvent(dpy, &ev);
         //
         // Eventos de la Ventana scr
         //
@@ -50,12 +53,17 @@ int main(){
         if( ev.xfocus.window == win_lanzadera ){
             switch(ev.type){
                 case ButtonPress:
-                    win_lanzadera_click(ev);
+                    winLanzaderaClick(ev);
                     break;
 
                 case KeyPress:
                     key = XkbKeycodeToKeysym(dpy, ev.xkey.keycode, 0, ev.xkey.state & ShiftMask ? 1 : 0);
-                    if(key == ESC) salir();
+                    if(key == ESC){
+                        salir();
+                    }
+                    else{
+                        winEditKeyPress(ev);
+                    }
                     break;
             }
         }
@@ -89,18 +97,18 @@ int main(){
                 case Expose:
                     // Si es la ultima interuccion del evento expose
                     if( ev.xexpose.count == 0 ){
-                    refreshEdit();
+                        refreshEdit();
                     }
                     break;
 
                 case KeyPress:
-                    key = XkbKeycodeToKeysym(dpy, ev.xkey.keycode, 0, ev.xkey.state & ShiftMask ? 1 : 0);
-                    if(key == ESC) salir();
+                    winEditKeyPress(ev);
                     break;
 
                 case ButtonPress:
-                    win_edit_click(ev);
+                    winEditClick(ev);
                     break;
+
             }
         }
 

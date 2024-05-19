@@ -1,192 +1,41 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <Imlib2.h>
+#include <X11/XKBlib.h>     // Para usar xkbKeycodeToKeysyn
 
 #include "ui.h"
+
+#define BTN_LANZADERA       100
+#define MAX_OPT_LANZADERA   5
+#define MAX_TXT             6
 
 //
 // Aqui declaro todos los controles que aceptan eventos
 //
-Datos   chk_funcion[4];
+Datos   chk[4];
+Datos   txt[MAX_TXT];
 
 
 void initUi(){
 
-    // iniciamos las variables
-    dpy             = XOpenDisplay((char *)0);
-    scr             = DefaultScreen(dpy);
-    blanco          = WhitePixel(dpy, scr);
-    negro           = BlackPixel(dpy, scr);
-    ancho_pantalla  = DisplayWidth(dpy, scr);
-    alto_pantalla   = DisplayHeight(dpy, scr);
+    //
+    // Iniciamos las ventanas
+    //
+    initWindows();
 
     //
-    //Colores
-    //
-    azul        = colorPorNombre(dpy, "blue");
-    purpura     = colorPorNombre(dpy, "medium purple");
-    azure       = colorPorNombre(dpy, "azure");
-    rojo        = colorPorNombre(dpy, "red");
-    amarillo    = colorPorNombre(dpy, "yellow");
-    gris        = colorPorNombre(dpy, "gray");
-    gris_oscuro = colorPorNombre(dpy, "dim gray");
-    gris_claro  = colorPorNombre(dpy, "light grey");
-
-    //
-    // creamos la ventana principal
-    //
-    win_scr = XCreateSimpleWindow(dpy,
-                                DefaultRootWindow(dpy),
-                                0,
-                                0,
-                                ancho_pantalla,
-                                alto_pantalla,
-                                0,
-                                blanco,
-                                gris_oscuro);
-
-    dat_scr.id          = win_scr;
-    dat_scr.x           = 0;
-    dat_scr.y           = 0;
-    dat_scr.ancho       = ancho_pantalla;
-    dat_scr.alto        = alto_pantalla;
-    dat_scr.borde       = 0;
-    dat_scr.color       = blanco;
-    dat_scr.back_color  = gris_oscuro;
-
-    //
-    // creamos la ventana lanzadera
-    //
-    win_lanzadera = XCreateSimpleWindow(dpy,
-                                        win_scr,
-                                        ancho_pantalla - 90 -100,
-                                        0,
-                                        100,
-                                        alto_pantalla -67,
-                                        0,
-                                        negro,
-                                        purpura);
-
-    dat_lanzadera.id            = win_scr;
-    dat_lanzadera.x             = ancho_pantalla -90 -100;
-    dat_lanzadera.y             = 0;
-    dat_lanzadera.ancho         = 100;
-    dat_lanzadera.borde         = 0;
-    dat_lanzadera.alto          = alto_pantalla -67;
-    dat_lanzadera.color         = negro;
-    dat_lanzadera.back_color    = purpura;
-
-    //
-    // creamos la ventana grafica
-    //
-    win_graf = XCreateSimpleWindow(dpy,
-                            win_scr,
-                            0,
-                            0,
-                            ancho_pantalla -90 -100,
-                            alto_pantalla - 67,
-                            0,
-                            negro,
-                            rojo);
-
-    //
-    // Establecemos las propiedades de win_graf
-    //
-    dat_win_graf.id          = 0;
-    dat_win_graf.x           = 0;
-    dat_win_graf.y           = 0;
-    dat_win_graf.ancho       = ancho_pantalla -90 -100;
-    dat_win_graf.alto        = alto_pantalla -67;
-    dat_win_graf.borde       = 0;
-    dat_win_graf.color       = negro;
-    dat_win_graf.back_color  = rojo;
-
-    //
-    // creamos la ventana edit
-    //
-    win_edit = XCreateSimpleWindow(dpy,
-                                win_scr,
-                                0,
-                                0,
-                                ancho_pantalla -90 -100,
-                                alto_pantalla - 67,
-                                0,
-                                negro,
-                                gris_claro);
-
-    //
-    // Establecemos las propiedades de win_edit
-    //
-    dat_win_edit.id          = 0;
-    dat_win_edit.x           = 0;
-    dat_win_edit.y           = 0;
-    dat_win_edit.ancho       = ancho_pantalla -90 -100;
-    dat_win_edit.alto        = alto_pantalla -67;
-    dat_win_edit.borde       = 0;
-    dat_win_edit.color       = negro;
-    dat_win_edit.back_color  = gris_claro;
-
-
-    //
-    // creamos la ventana Abrir
-    //
-    win_abrir = XCreateSimpleWindow(dpy,
-                                win_scr,
-                                0,
-                                0,
-                                ancho_pantalla -90 -100,
-                                alto_pantalla - 67,
-                                0,
-                                negro,
-                                azul);
-
-    //
-    // Establecemos las propiedades de win_abrir
-    //
-    dat_win_abrir.id          = 0;
-    dat_win_abrir.x           = 0;
-    dat_win_abrir.y           = 0;
-    dat_win_abrir.ancho       = ancho_pantalla -90 -100;
-    dat_win_abrir.alto        = alto_pantalla -67;
-    dat_win_abrir.borde       = 0;
-    dat_win_abrir.color       = negro;
-    dat_win_abrir.back_color  = azul;
-
-
-    //
-    // creamos la ventana math
-    //
-    win_math = XCreateSimpleWindow(dpy,
-                                win_scr,
-                                0,
-                                0,
-                                ancho_pantalla -90 -100,
-                                alto_pantalla - 67,
-                                0,
-                                negro,
-                                amarillo);
-
-    //
-    // Establecemos las propiedades de win_math
-    //
-    dat_win_math.id          = 0;
-    dat_win_math.x           = 0;
-    dat_win_math.y           = 0;
-    dat_win_math.ancho       = ancho_pantalla -90 -100;
-    dat_win_math.alto        = alto_pantalla -67;
-    dat_win_math.borde       = 0;
-    dat_win_math.color       = negro;
-    dat_win_math.back_color  = amarillo;
-
-
     // Establecemos las ventanas
+    //
     XSetStandardProperties(dpy, win_scr, TITULO, TITULO, None, NULL, 0, NULL);
 
+    //
     // Establecemos los tipos de eventos que queremos en la ventana principal
+    //
     XSelectInput(dpy, win_scr, ExposureMask | ButtonPressMask | KeyPressMask | StructureNotifyMask );
     XSelectInput(dpy, win_lanzadera, ExposureMask | ButtonPressMask | KeyPressMask);
     XSelectInput(dpy, win_graf, ExposureMask | ButtonPressMask | KeyPressMask);
@@ -228,14 +77,276 @@ void initUi(){
     XMapRaised(dpy, win_edit);
     XMapRaised(dpy, win_lanzadera);
 
+}
+
+void initWindows(){
+
     //
-    // Ponemos la pantalla edit como favorita
+    // iniciamos las variables
     //
-    opt_lanzadera = 1;
+    dpy             = XOpenDisplay((char *)0);
+    scr             = DefaultScreen(dpy);
+    blanco          = WhitePixel(dpy, scr);
+    negro           = BlackPixel(dpy, scr);
+    ancho_pantalla  = DisplayWidth(dpy, scr);
+    alto_pantalla   = DisplayHeight(dpy, scr);
+
     //
-    // Ponemos el foco en la ventana edit
+    //Iniciamos los colores
     //
-    sprintf(focus, "win_edit");
+    azul        = colorPorNombre(dpy, "blue");
+    purpura     = colorPorNombre(dpy, "medium purple");
+    azure       = colorPorNombre(dpy, "azure");
+    rojo        = colorPorNombre(dpy, "red");
+    amarillo    = colorPorNombre(dpy, "yellow");
+    gris        = colorPorNombre(dpy, "gray");
+    gris_oscuro = colorPorNombre(dpy, "DarkSlateGray");
+    gris_claro  = colorPorNombre(dpy, "LightGray");
+
+    //
+    // creamos la ventana principal
+    //
+    win_scr = XCreateSimpleWindow(dpy,
+                                DefaultRootWindow(dpy),
+                                0,
+                                0,
+                                ancho_pantalla,
+                                alto_pantalla,
+                                0,
+                                blanco,
+                                gris_oscuro);
+
+    dat_scr.id          = win_scr;
+    dat_scr.x           = 0;
+    dat_scr.y           = 0;
+    dat_scr.ancho       = ancho_pantalla;
+    dat_scr.alto        = alto_pantalla;
+    dat_scr.borde       = 0;
+    dat_scr.color       = blanco;
+    dat_scr.back_color  = gris_oscuro;
+
+    //
+    // creamos la ventana lanzadera
+    //
+    win_lanzadera = XCreateSimpleWindow(dpy,
+                                        win_scr,
+                                        ancho_pantalla - 90 -100,
+                                        0,
+                                        100,
+                                        alto_pantalla -67,
+                                        0,
+                                        negro,
+                                        purpura);
+
+    dat_lanzadera.id            = win_lanzadera;
+    dat_lanzadera.x             = ancho_pantalla -90 -100;
+    dat_lanzadera.y             = 0;
+    dat_lanzadera.ancho         = 100;
+    dat_lanzadera.borde         = 0;
+    dat_lanzadera.alto          = alto_pantalla -67;
+    dat_lanzadera.color         = negro;
+    dat_lanzadera.back_color    = purpura;
+
+    //
+    // creamos la ventana grafica
+    //
+    win_graf = XCreateSimpleWindow(dpy,
+                            win_scr,
+                            0,
+                            0,
+                            ancho_pantalla -90 -100,
+                            alto_pantalla - 67,
+                            0,
+                            negro,
+                            rojo);
+
+    //
+    // Establecemos las propiedades de win_graf
+    //
+    dat_win_graf.id          = win_graf;
+    dat_win_graf.x           = 0;
+    dat_win_graf.y           = 0;
+    dat_win_graf.ancho       = ancho_pantalla -90 -100;
+    dat_win_graf.alto        = alto_pantalla -67;
+    dat_win_graf.borde       = 0;
+    dat_win_graf.color       = negro;
+    dat_win_graf.back_color  = rojo;
+
+    //
+    // creamos la ventana edit
+    //
+    win_edit = XCreateSimpleWindow(dpy,
+                                win_scr,
+                                0,
+                                0,
+                                ancho_pantalla -90 -100,
+                                alto_pantalla - 67,
+                                0,
+                                negro,
+                                gris);
+
+    //
+    // Establecemos las propiedades de win_edit
+    //
+    dat_win_edit.id          = win_edit;
+    dat_win_edit.x           = 0;
+    dat_win_edit.y           = 0;
+    dat_win_edit.ancho       = ancho_pantalla -90 -100;
+    dat_win_edit.alto        = alto_pantalla -67;
+    dat_win_edit.borde       = 0;
+    dat_win_edit.color       = negro;
+    dat_win_edit.back_color  = gris;
+
+
+    //
+    // creamos la ventana Abrir
+    //
+    win_abrir = XCreateSimpleWindow(dpy,
+                                win_scr,
+                                0,
+                                0,
+                                ancho_pantalla -90 -100,
+                                alto_pantalla - 67,
+                                0,
+                                negro,
+                                azul);
+
+    //
+    // Establecemos las propiedades de win_abrir
+    //
+    dat_win_abrir.id          = win_abrir;
+    dat_win_abrir.x           = 0;
+    dat_win_abrir.y           = 0;
+    dat_win_abrir.ancho       = ancho_pantalla -90 -100;
+    dat_win_abrir.alto        = alto_pantalla -67;
+    dat_win_abrir.borde       = 0;
+    dat_win_abrir.color       = negro;
+    dat_win_abrir.back_color  = azul;
+
+
+    //
+    // creamos la ventana math
+    //
+    win_math = XCreateSimpleWindow(dpy,
+                                win_scr,
+                                0,
+                                0,
+                                ancho_pantalla -90 -100,
+                                alto_pantalla - 67,
+                                0,
+                                negro,
+                                amarillo);
+
+    //
+    // Establecemos las propiedades de win_math
+    //
+    dat_win_math.id          = win_math;
+    dat_win_math.x           = 0;
+    dat_win_math.y           = 0;
+    dat_win_math.ancho       = ancho_pantalla -90 -100;
+    dat_win_math.alto        = alto_pantalla -67;
+    dat_win_math.borde       = 0;
+    dat_win_math.color       = negro;
+    dat_win_math.back_color  = amarillo;
+
+}
+
+void initControls(){
+    int         x0 = (int)(dat_win_edit.ancho/2);
+    int         y0 = (int)(dat_win_edit.alto/2);
+    XFontStruct *xfs;
+    int         x, y, ancho, alto;
+
+
+    //
+    //Iniciamos el txt_grado
+    //
+    xfs = XLoadQueryFont(dpy, FONT_G);
+
+    sprintf(txt[0].nombre, "txt_grado");
+    txt[0].x        = x0 + 100 +485 ;
+    txt[0].y        = y0 -(y0 -150);
+    txt[0].ancho    = 100;
+    txt[0].alto     = 50;
+    txt[0].color    = negro;
+    txt[0].xfs      = xfs;
+    txt[0].id       = win_edit;
+    txt[0].gc       = gc_edit;
+
+    //
+    //Iniciamos el txt_x(Exp)4
+    //
+    x       = x0 +100 +100;
+    y       = y0 -(y0 -250);
+    ancho   = 100;
+    alto    = 50;
+
+    sprintf(txt[1].nombre, "txt_x4");
+    txt[1].x        = x;
+    txt[1].y        = y;
+    txt[1].ancho    = ancho;
+    txt[1].alto     = alto;
+    txt[1].color    = negro;
+    txt[1].xfs      = xfs;
+    txt[1].id       = win_edit;
+    txt[1].gc       = gc_edit;
+
+    //
+    //Iniciamos el txt_x(Exp)3
+    //
+    sprintf(txt[2].nombre, "txt_x3");
+    txt[2].x        = x;
+    txt[2].y        = y +75;
+    txt[2].ancho    = ancho;
+    txt[2].alto     = alto;
+    txt[2].color    = negro;
+    txt[2].xfs      = xfs;
+    txt[2].id       = win_edit;
+    txt[2].gc       = gc_edit;
+
+    //
+    //Iniciamos el txt_x(Exp)2
+    //
+    sprintf(txt[3].nombre, "txt_x2");
+    txt[3].x        = x;
+    txt[3].y        = y +150;
+    txt[3].ancho    = ancho;
+    txt[3].alto     = alto;
+    txt[3].color    = negro;
+    txt[3].xfs      = xfs;
+    txt[3].id       = win_edit;
+    txt[3].gc       = gc_edit;
+
+    //
+    //Iniciamos el txt_x(Exp)1
+    //
+    sprintf(txt[4].nombre, "txt_x1");
+    txt[4].x        = x;
+    txt[4].y        = y +225;
+    txt[4].ancho    = ancho;
+    txt[4].alto     = alto;
+    txt[4].color    = negro;
+    txt[4].xfs      = xfs;
+    txt[4].id       = win_edit;
+    txt[4].gc       = gc_edit;
+
+    //
+    //Iniciamos el txt_x(Exp)0
+    //
+    sprintf(txt[5].nombre, "txt_x0");
+    txt[5].x        = x;
+    txt[5].y        = y +300;
+    txt[5].ancho    = ancho;
+    txt[5].alto     = alto;
+    txt[5].color    = negro;
+    txt[5].xfs      = xfs;
+    txt[5].id       = win_edit;
+    txt[5].gc       = gc_edit;
+
+    //
+    // Colocamos como activo el foco en txt[0]
+    //
+    setFocus(txt[0].nombre);
 }
 
 void refreshUi(){
@@ -317,6 +428,11 @@ void refreshEdit(){
     }
 
     //
+    // Refrescamos el foco, con el ultimo control que tenia el foco
+    //
+    refreshFocus();
+
+    //
     // Creo los cuadros
     //
     XSetForeground(dpy, gc_edit, negro);
@@ -335,6 +451,26 @@ void refreshEdit(){
     XFillRectangle(dpy, win_edit, gc_edit, 0, y0 + 182, dat_win_edit.ancho, 18);
     XFillRectangle(dpy, win_edit, gc_edit, x0 -19, 0, 38, y0 + 183);
 
+
+
+}
+
+void refreshFocus(){
+    int i;
+
+    //
+    // comprobamos si el del foco es un txt
+    //
+    i = 0;
+    while(i<MAX_TXT){
+        if(strcmp(focus, txt[i].nombre) == 0){
+            //
+            // Tenemos que dibujar una barra al final
+            //
+            setCursor(txt[i]);
+        }
+        i++;
+    }
 }
 
 void pintaChkFunciones(){
@@ -347,27 +483,26 @@ void pintaChkFunciones(){
     //
     // Pintamos el texto
     //
-    xfs = XLoadQueryFont(dpy, "12x24");
+    xfs = XLoadQueryFont(dpy, FONT_G);
     XSetForeground(dpy, gc_edit, azul);
 
     sprintf(msg, "Elige el tipo de funcion...");
-    setTexto(win_edit, gc_edit, msg, xfs, w, h, 400, 50);
+    setTexto(win_edit, gc_edit, msg, xfs, azul, w, h, 400, 50);
 
-    xfs = XLoadQueryFont(dpy, "9x15bold");
+    xfs = XLoadQueryFont(dpy, FONT_N_B);
 
     sprintf(msg,"1.- Funcion polinomica.");
-    setTexto(win_edit, gc_edit, msg, xfs, w +50, h +100, 400, 50);
+    setTexto(win_edit, gc_edit, msg, xfs, azul, w +50, h +100, 400, 50);
     sprintf(msg,"2.- Funcion trigonometrica.");
-    setTexto(win_edit, gc_edit, msg, xfs, w +50, h +150, 400, 50);
+    setTexto(win_edit, gc_edit, msg, xfs, azul, w +50, h +150, 400, 50);
     sprintf(msg,"3.- Funcion exponencial.");
-    setTexto(win_edit, gc_edit, msg, xfs, w +50, h +200, 400, 50);
+    setTexto(win_edit, gc_edit, msg, xfs, azul, w +50, h +200, 400, 50);
     sprintf(msg,"4.- Funcion logaritmica.");
-    setTexto(win_edit, gc_edit, msg, xfs, w +50, h +250, 400, 50);
+    setTexto(win_edit, gc_edit, msg, xfs, azul, w +50, h +250, 400, 50);
 
     //
     // Pintamos lo chks
     //
-    int jj = opt_funcion;
     i = 0;
     while(i < 4){
         if(i == opt_funcion){
@@ -376,10 +511,10 @@ void pintaChkFunciones(){
         else{
             setUnClick(dpy, win_edit, gc_edit, w, h +80 +(50 * i), 25, 25);
         }
-        chk_funcion[i].x        = w;
-        chk_funcion[i].y        = h + 80 +(50 * i);
-        chk_funcion[i].ancho    = 25;
-        chk_funcion[i].alto     = 25;
+        chk[i].x        = w;
+        chk[i].y        = h + 80 +(50 * i);
+        chk[i].ancho    = 25;
+        chk[i].alto     = 25;
         i++;
     }
 }
@@ -387,9 +522,59 @@ void pintaChkFunciones(){
 void pintaPolinomicas(){
     int         x0 = (int)(dat_win_edit.ancho/2);
     int         y0 = (int)(dat_win_edit.alto/2);
+    char        msg[1024];
+    XFontStruct *xfs;
+    int         x, y, ancho, alto;
 
+    //
+    // Primero hago un borrado del cuadro
+    //
     XSetForeground(dpy, gc_edit, dat_win_edit.back_color);
     XFillRectangle(dpy, win_edit, gc_edit, x0 + 22, 22, x0 -46, y0 +154);
+
+    //
+    // Pedimos el grado de la funcion
+    //
+    xfs = XLoadQueryFont(dpy, FONT_G);
+
+    XSetForeground(dpy, gc_edit, azul);
+    sprintf(msg, "Indica el grado de la funcion ( Max. 4 )");
+    setTexto(win_edit, gc_edit, msg, xfs, azul, x0 + 100, y0 -(y0 - 150), 485, 50);
+
+    //
+    // dibujamos el txt[0], el txt_grado
+    //
+    setEditText(win_edit, gc_edit, xfs, txt[0]);
+
+    //
+    // colocamos los indices de las potencias
+    //
+    XSetForeground(dpy, gc_edit, azul);
+
+    x       = x0 +100 +100 +150;
+    y       = y0 -(y0 -250);
+    ancho   = 100;
+    alto    = 100;
+
+    sprintf(msg, "X(Exp)4");
+    setTexto(win_edit, gc_edit, msg, xfs, azul, x, y, ancho, alto);
+    setEditText(win_edit, gc_edit, xfs, txt[1]);
+
+    sprintf(msg, "X(Exp)3");
+    setTexto(win_edit, gc_edit, msg, xfs, azul, x, y +75, ancho, alto);
+    setEditText(win_edit, gc_edit, xfs, txt[2]);
+
+    sprintf(msg, "X(Exp)2");
+    setTexto(win_edit, gc_edit, msg, xfs, azul, x, y +150, ancho, alto);
+    setEditText(win_edit, gc_edit, xfs, txt[3]);
+
+    sprintf(msg, "X");
+    setTexto(win_edit, gc_edit, msg, xfs, azul, x, y +225, ancho, alto);
+    setEditText(win_edit, gc_edit, xfs, txt[4]);
+
+    sprintf(msg, "Cte.");
+    setTexto(win_edit, gc_edit, msg, xfs, azul, x, y +300, ancho, alto);
+    setEditText(win_edit, gc_edit, xfs, txt[5]);
 }
 
 void pintaTrigonometricas(){
@@ -398,6 +583,8 @@ void pintaTrigonometricas(){
 
     XSetForeground(dpy, gc_edit, rojo);
     XFillRectangle(dpy, win_edit, gc_edit, x0 + 22, 22, x0 -46, y0 +154);
+
+    setFocus("");
 }
 
 void pintaExponenciales(){
@@ -443,6 +630,10 @@ void closeUi(){
 }
 
 void resizeWin(XEvent ev){
+    int x0;
+    int y0;
+    int x, y;
+    int i;
 
     dat_scr.x       = ev.xconfigure.x;
     dat_scr.y       = ev.xconfigure.y;
@@ -473,6 +664,28 @@ void resizeWin(XEvent ev){
     dat_lanzadera.y       = 1;
     dat_lanzadera.ancho   = 100;
     dat_lanzadera.alto    = dat_scr.alto -4;
+
+    //
+    // Control txt_grado
+    //
+    x0 = (int)(dat_win_edit.ancho/2);
+    y0 = (int)(dat_win_edit.alto/2);
+
+    txt[0].x        = x0 + 100 +485 ;
+    txt[0].y        = y0 -(y0 -150);
+
+    //
+    // Resto de controles
+    //
+    x = x0 +100 +100;
+    y = y0 -(y0 -250);
+
+    i = 1;
+    while(i < MAX_TXT){
+        txt[i].x = x;
+        txt[i].y = y +((i -1) * 75);
+        i++;
+    }
 }
 
 void salir(){
@@ -553,6 +766,29 @@ XImage *loadImagen(Display *display, Window w, char *ruta){
     return x_img;
 }
 
+char *getFocus(){
+    char nombre[1024];
+    char *ptr;
+
+    strcpy(nombre, focus);
+    ptr = &nombre[0];
+
+    return ptr;
+}
+
+char *getOldFocus(Window w){
+    char nombre[1024];
+    char *ptr;
+
+    if(w == dat_win_edit.id){
+        strcpy(nombre, old_focus_edit);
+    }
+
+    ptr = &nombre[0];
+
+    return ptr;
+}
+
 void setClick(Display *d, Window w, GC gc, int x, int y, int ancho, int alto){
 
     XSetLineAttributes( d, gc, 3, LineSolid, CapRound, JoinMiter);
@@ -560,14 +796,14 @@ void setClick(Display *d, Window w, GC gc, int x, int y, int ancho, int alto){
     //
     // La linea h2 y v2 claras
     //
-    XSetForeground( d, gc, blanco);
+    XSetForeground( d, gc, gris_claro);
     XDrawLine( d, w, gc, x, y + alto, x + ancho, y + alto);                     // H2
     XDrawLine( d, w, gc, x + ancho, y, x + ancho, y + alto);                    // V2
 
     //
     // La linea h1 y v1 oscuras
     //
-    XSetForeground( d, gc, negro);
+    XSetForeground( d, gc, gris_oscuro);
     XDrawLine( d, w, gc, x, y, x + ancho, y);                                   // H1
     XDrawLine( d, w, gc, x, y, x, y + alto);                                    // V1
 }
@@ -579,20 +815,160 @@ void setUnClick(Display *d, Window w, GC gc, int x, int y, int ancho, int alto){
     //
     // La linea h1 y v1 claras
     //
-    XSetForeground( d, gc, blanco);
+    XSetForeground( d, gc, gris_claro);
     XDrawLine( d, w, gc, x, y, x + ancho, y);                                   // H1
     XDrawLine( d, w, gc, x, y, x, y + alto);                                    // V1
 
     //
     // La linea h2 y v2 oscuras
     //
-    XSetForeground( d, gc, negro);
+    XSetForeground( d, gc, gris_oscuro);
     XDrawLine( d, w, gc, x, y + alto, x + ancho, y + alto);                     // H2
     XDrawLine( d, w, gc, x + ancho, y, x + ancho, y + alto);                    // V2
 
 }
 
-void win_lanzadera_click(XEvent ev){
+void setTexto(Window w, GC gc, char *msg, XFontStruct *xfs, unsigned long color, int x0, int y0, int ancho, int alto){
+    int tam_msg_pixels, tam_caracter, n_max_carcters;
+    int tam;
+
+    tam_msg_pixels  = XTextWidth(xfs, msg, strlen(msg));
+    if(tam_msg_pixels > 0){
+        tam_caracter    = (int) (tam_msg_pixels / strlen(msg));
+        n_max_carcters  = (int) (ancho / tam_caracter);
+    }
+    else{
+        tam_caracter    = 0;
+        n_max_carcters  = 0;
+    }
+
+
+    if(strlen(msg) <= n_max_carcters){
+        tam = strlen(msg);
+    }
+    else{
+        tam = n_max_carcters;
+    }
+
+    XSetFont(dpy, gc, xfs->fid);
+    XSetForeground(dpy, gc, color);
+    XDrawString(dpy, w, gc, x0, y0, msg, tam);
+}
+
+void setEditText(Window w, GC gc, XFontStruct *xfs, Datos txt_texto){
+    int     x   = txt_texto.x +5;
+    int     y   = txt_texto.y -(int) (txt_texto.alto / 2) - 10;
+    int     i, j;
+    int     ancho_msg, max_caracters, ancho_caracter, len_msg;
+    char    msg_visual[1024];
+
+    //
+    // Dibujamos el cuadro blanco
+    //
+    XSetForeground(dpy, gc, blanco);
+    XFillRectangle(dpy, w, gc, x, y, txt_texto.ancho, txt_texto.alto);
+
+    //
+    // Obtenemos los max caracteres a mostrar, y le restamos 2
+    //
+    len_msg     = strlen(txt_texto.msg);
+    ancho_msg   = XTextWidth(xfs, txt_texto.msg, len_msg);
+
+    if(ancho_msg > 0){
+        ancho_caracter  = (int) (ancho_msg / len_msg);
+        max_caracters   = (int) (txt_texto.ancho / ancho_caracter);
+    }
+    else{
+        ancho_caracter  = 0;
+        max_caracters   = 0;
+    }
+    max_caracters -= 2;
+    if(max_caracters < 0) max_caracters = 0;
+    if(max_caracters > 1022) max_caracters = 1022;
+
+    //
+    // Ahora si el texto es muy grande, mostramos solo el final
+    //
+    if(len_msg > 0 && len_msg >= max_caracters){
+        i = max_caracters -1;
+        j = 0;
+        msg_visual[max_caracters +1]   = '\0';
+        while(j < max_caracters){
+            msg_visual[i] = txt_texto.msg[len_msg -1 -j];
+            i--;
+            j++;
+        }
+    }
+    else{
+        strcpy(msg_visual, txt_texto.msg);
+    }
+
+    setClick(dpy, w, gc, x, y, txt_texto.ancho, txt_texto.alto);
+    setTexto(w, gc, msg_visual, txt_texto.xfs, txt_texto.color, x +8, txt_texto.y, txt_texto.ancho, txt_texto.alto);
+}
+
+void setCursor(Datos txt){
+    int     x, y;
+    int     ancho_msg, ancho_caracter, max_caracters;
+
+    ancho_msg           = XTextWidth(txt.xfs, txt.msg, strlen(txt.msg));
+    if(ancho_msg > 0){
+        ancho_caracter  = (int) (ancho_msg / strlen(txt.msg));
+        max_caracters   = (int) (txt.ancho / ancho_caracter) - 1;
+    }
+    else{
+        ancho_caracter = 0;
+    }
+
+    XSetLineAttributes( dpy, txt.gc, 3, LineSolid, CapRound, JoinMiter);
+    XSetForeground(dpy, txt.gc, txt.color);
+
+    if(strlen(txt.msg) > max_caracters -1){
+        x = (int) txt.x + txt.ancho - (2 * ancho_caracter);
+        y = txt.y -(int) (txt.alto / 2) - 10;
+    }
+    else{
+        x = (strlen(txt.msg) * ancho_caracter) + txt.x + (int) (ancho_caracter/ 2);
+        y = txt.y -(int) (txt.alto / 2) - 10;
+    }
+
+    XDrawLine(dpy, txt.id, txt.gc, x + 10, y +10, x +10, y + txt.alto -10);
+}
+
+void setFocus(char *nombre){
+    int i;
+
+    //
+    // Colocamos los valores is focused
+    //
+    i = 0;
+    while(i<MAX_TXT){
+        if(strcmp(nombre, txt[i].nombre) == 0){
+            txt[i].is_focused = True;
+        }
+        else{
+            txt[i].is_focused = False;
+        }
+        i++;
+    }
+
+    if(strlen(nombre) > 0){
+        strcpy(focus, nombre);
+        strcpy(old_focus_edit, nombre);
+    }
+    else{
+        sprintf(focus, "-1");
+    }
+}
+
+void setOldFocus(Window w, char *nombre){
+
+    if(w == dat_win_edit.id){
+        strcpy(old_focus_edit, nombre);
+    }
+}
+
+void winLanzaderaClick(XEvent ev){
     int i, j, opt;
 
     //
@@ -617,20 +993,18 @@ void win_lanzadera_click(XEvent ev){
         opt_lanzadera = opt;
         switch(opt){
             case 0:
+                setFocus(dat_win_abrir.nombre);
                 XMapRaised(dpy, win_abrir);
-                sprintf(focus, "win_abrir");
                 break;
             case 1:
+                setFocus(getOldFocus(win_edit));
                 XMapRaised(dpy, win_edit);
-                sprintf(focus, "win_edit");
                 break;
             case 2:
                 XMapRaised(dpy, win_math);
-                sprintf(focus, "win_math");
                 break;
             case 3:
                 XMapRaised(dpy, win_graf);
-                sprintf(focus, "win_graf");
                 break;
             case 4:
                 salir();
@@ -644,25 +1018,24 @@ void win_lanzadera_click(XEvent ev){
     refreshUi();
 }
 
-void win_edit_click(XEvent ev){
-    int i;
-    int x, y, ancho, alto;
+void winLanzaderaKeyPress(XEvent ev){
+    winEditKeyPress(ev);
+}
+
+void winEditClick(XEvent ev){
+    int i, x, y, ancho, alto;
 
     //
     // Comprobamos las chk
     //
-    x       = chk_funcion[0].x;
-    y       = chk_funcion[0].y;
-    ancho   = chk_funcion[0].ancho;
-    alto    = chk_funcion[0].alto;
+    x       = chk[0].x;
+    ancho   = chk[0].ancho;
 
     if(ev.xbutton.x >= x && ev.xbutton.x <= (x + ancho)){
         i = 0;
         while(i<4){
-            x       = chk_funcion[i].x;
-            y       = chk_funcion[i].y;
-            ancho   = chk_funcion[i].ancho;
-            alto    = chk_funcion[i].alto;
+            y       = chk[i].y;
+            alto    = chk[i].alto;
 
             if(ev.xbutton.y >= y && ev.xbutton.y <= (y + alto)){
                 opt_funcion = i;
@@ -673,28 +1046,127 @@ void win_edit_click(XEvent ev){
     }
 
     //
+    //Comprobamos los controles, si alguno se clicka, le damos el foco
+    //
+    i = 0;
+    while(i < MAX_TXT){
+        x       = txt[i].x + 6;
+        y       = txt[i].y -(int) (txt[i].alto / 2) - 10;
+        ancho   = txt[i].ancho;
+        alto    =txt[i].alto;
+
+        if(ev.xbutton.x >= x && ev.xbutton.x <= (x + ancho)){
+            if(ev.xbutton.y >= y && ev.xbutton.y <= (y + alto)){
+                setFocus(txt[i].nombre);
+                i = MAX_TXT;
+            }
+        }
+        i++;
+    }
+
+
+    //
     // Refrescamos la pantalla
     //
-    int jj = opt_funcion;
     refreshEdit();
 }
 
-void setTexto(Window w, GC gc, char *msg, XFontStruct *xfs, int x0, int y0, int ancho, int alto){
-    int tam_msg_pixels, tam_caracter, n_max_carcters;
-    int tam;
+void winEditKeyPress(XEvent ev){
+    int     i, n_foco, len_msg;
+    char    key;
+    char    msg[1024];
 
-    tam_msg_pixels  = XTextWidth(xfs, msg, strlen(msg));
-    tam_caracter    = (int) (tam_msg_pixels / strlen(msg));
-    n_max_carcters  = (int) (ancho / tam_caracter);
 
-    if(strlen(msg) <= n_max_carcters){
-        tam = strlen(msg);
+    //
+    // Obtenemos el  caracter
+    //
+    key = XkbKeycodeToKeysym(dpy, ev.xkey.keycode, 0, ev.xkey.state & ShiftMask ? 1 : 0);
+
+    //
+    // Comprobamos si hay algun txt con el foco
+    //
+    i       = 0;
+    n_foco  = -1;
+    while(i<MAX_TXT){
+        if(strcmp(txt[i].nombre, focus) == 0 && txt[i].is_focused == True){
+            n_foco = i;
+            i = MAX_TXT;
+        }
+        i++;
     }
+
+    //
+    // Si es la tecla ESC salimos
+    //
+    if(ev.xkey.keycode == ESC){
+        salir();
+    }
+
+    //
+    // Si es BACK borramos la ultima letra
+    //
+    if(ev.xkey.keycode == BACK && n_foco >= 0){
+        len_msg = strlen(txt[n_foco].msg);
+        if(len_msg > 0){
+            strcpy(msg, txt[n_foco].msg);
+            msg[len_msg -1] = '\0';
+            strcpy(txt[n_foco].msg, msg);
+        }
+    }
+    //
+    // Si es ENTER pasamos el foco al siguiente control, y si es el ultimo
+    //
+    else if(ev.xkey.keycode == ENTER || ev.xkey.keycode == RUN){
+        if(n_foco >= 0 && n_foco < MAX_TXT -1){
+            setFocus(txt[n_foco + 1].nombre);
+        }
+        else{
+            setFocus(dat_win_edit.nombre);
+            setOldFocus(win_edit, "");
+        }
+    }
+    //
+    // Si es mayuscula
+    //
+    else if(ev.xkey.keycode == KEY_MAY){
+
+    }
+    //
+    // Cualquier otra pulsacion
+    //
     else{
-        tam = n_max_carcters;
+        //
+        // Interpretamos el teclado numerico
+        //
+        if(ev.xkey.keycode == KEY_0){key = '0';}
+        if(ev.xkey.keycode == KEY_1){key = '1';}
+        if(ev.xkey.keycode == KEY_2){key = '2';}
+        if(ev.xkey.keycode == KEY_3){key = '3';}
+        if(ev.xkey.keycode == KEY_4){key = '4';}
+        if(ev.xkey.keycode == KEY_5){key = '5';}
+        if(ev.xkey.keycode == KEY_6){key = '6';}
+        if(ev.xkey.keycode == KEY_7){key = '7';}
+        if(ev.xkey.keycode == KEY_8){key = '8';}
+        if(ev.xkey.keycode == KEY_9){key = '9';}
+        if(ev.xkey.keycode == KEY_MUL){key = '*';}
+        if(ev.xkey.keycode == KEY_DIV){key = '/';}
+        if(ev.xkey.keycode == KEY_SUM){key = '+';}
+        if(ev.xkey.keycode == KEY_RES){key = '-';}
+        if(ev.xkey.keycode == KEY_PTO){key = '.';}
+
+        //
+        // Añadimos el caracter al msg
+        //
+        if(strlen(txt[n_foco].msg) < 1023 && n_foco >= 0){
+            txt[n_foco].msg[strlen(txt[n_foco].msg)]      = key;
+            txt[n_foco].msg[strlen(txt[n_foco].msg) +1]   = '\0';
+        }
     }
 
-    XSetFont(dpy, gc_edit, xfs->fid);
-
-    XDrawString(dpy, win_edit, gc_edit, x0, y0, msg, tam);
+    //
+    // Refrescamos la pantalla
+    //
+    refreshEdit();
 }
+
+
