@@ -11,7 +11,7 @@
 #include "ui.h"
 
 #define BTN_LANZADERA       100
-#define MAX_OPT_LANZADERA   5
+#define MAX_OPT_LANZADERA   6
 #define MAX_TXT             6
 
 //
@@ -223,6 +223,30 @@ void initWindows(){
     dat_win_abrir.color       = negro;
     dat_win_abrir.back_color  = azul;
 
+    //
+    // creamos la ventana Guardar
+    //
+    win_guardar = XCreateSimpleWindow(dpy,
+                                win_scr,
+                                0,
+                                0,
+                                ancho_pantalla -90 -100,
+                                alto_pantalla - 67,
+                                0,
+                                negro,
+                                amarillo);
+
+    //
+    // Establecemos las propiedades de win_abrir
+    //
+    dat_win_guardar.id          = win_guardar;
+    dat_win_guardar.x           = 0;
+    dat_win_guardar.y           = 0;
+    dat_win_guardar.ancho       = ancho_pantalla -90 -100;
+    dat_win_guardar.alto        = alto_pantalla -67;
+    dat_win_guardar.borde       = 0;
+    dat_win_guardar.color       = negro;
+    dat_win_guardar.back_color  = amarillo;
 
     //
     // creamos la ventana math
@@ -264,14 +288,15 @@ void initControls(){
     xfs = XLoadQueryFont(dpy, FONT_G);
 
     sprintf(txt[0].nombre, "txt_grado");
-    txt[0].x        = x0 + 100 +485 ;
-    txt[0].y        = y0 -(y0 -150);
-    txt[0].ancho    = 100;
-    txt[0].alto     = 50;
-    txt[0].color    = negro;
-    txt[0].xfs      = xfs;
-    txt[0].id       = win_edit;
-    txt[0].gc       = gc_edit;
+    txt[0].x            = x0 + 100 +485 ;
+    txt[0].y            = y0 -(y0 -150);
+    txt[0].ancho        = 100;
+    txt[0].alto         = 50;
+    txt[0].color        = negro;
+    txt[0].xfs          = xfs;
+    txt[0].id           = win_edit;
+    txt[0].gc           = gc_edit;
+    txt[0].is_enabled   = True;
 
     //
     //Iniciamos el txt_x(Exp)4
@@ -282,66 +307,71 @@ void initControls(){
     alto    = 50;
 
     sprintf(txt[1].nombre, "txt_x4");
-    txt[1].x        = x;
-    txt[1].y        = y;
-    txt[1].ancho    = ancho;
-    txt[1].alto     = alto;
-    txt[1].color    = negro;
-    txt[1].xfs      = xfs;
-    txt[1].id       = win_edit;
-    txt[1].gc       = gc_edit;
+    txt[1].x            = x;
+    txt[1].y            = y;
+    txt[1].ancho        = ancho;
+    txt[1].alto         = alto;
+    txt[1].color        = negro;
+    txt[1].xfs          = xfs;
+    txt[1].id           = win_edit;
+    txt[1].gc           = gc_edit;
+    txt[1].is_enabled   = True;
 
     //
     //Iniciamos el txt_x(Exp)3
     //
     sprintf(txt[2].nombre, "txt_x3");
-    txt[2].x        = x;
-    txt[2].y        = y +75;
-    txt[2].ancho    = ancho;
-    txt[2].alto     = alto;
-    txt[2].color    = negro;
-    txt[2].xfs      = xfs;
-    txt[2].id       = win_edit;
-    txt[2].gc       = gc_edit;
+    txt[2].x            = x;
+    txt[2].y            = y +75;
+    txt[2].ancho        = ancho;
+    txt[2].alto         = alto;
+    txt[2].color        = negro;
+    txt[2].xfs          = xfs;
+    txt[2].id           = win_edit;
+    txt[2].gc           = gc_edit;
+    txt[2].is_enabled   = True;
 
     //
     //Iniciamos el txt_x(Exp)2
     //
     sprintf(txt[3].nombre, "txt_x2");
-    txt[3].x        = x;
-    txt[3].y        = y +150;
-    txt[3].ancho    = ancho;
-    txt[3].alto     = alto;
-    txt[3].color    = negro;
-    txt[3].xfs      = xfs;
-    txt[3].id       = win_edit;
-    txt[3].gc       = gc_edit;
+    txt[3].x            = x;
+    txt[3].y            = y +150;
+    txt[3].ancho        = ancho;
+    txt[3].alto         = alto;
+    txt[3].color        = negro;
+    txt[3].xfs          = xfs;
+    txt[3].id           = win_edit;
+    txt[3].gc           = gc_edit;
+    txt[3].is_enabled   = True;
 
     //
     //Iniciamos el txt_x(Exp)1
     //
     sprintf(txt[4].nombre, "txt_x1");
-    txt[4].x        = x;
-    txt[4].y        = y +225;
-    txt[4].ancho    = ancho;
-    txt[4].alto     = alto;
-    txt[4].color    = negro;
-    txt[4].xfs      = xfs;
-    txt[4].id       = win_edit;
-    txt[4].gc       = gc_edit;
+    txt[4].x            = x;
+    txt[4].y            = y +225;
+    txt[4].ancho        = ancho;
+    txt[4].alto         = alto;
+    txt[4].color        = negro;
+    txt[4].xfs          = xfs;
+    txt[4].id           = win_edit;
+    txt[4].gc           = gc_edit;
+    txt[4].is_enabled   = True;
 
     //
     //Iniciamos el txt_x(Exp)0
     //
     sprintf(txt[5].nombre, "txt_x0");
-    txt[5].x        = x;
-    txt[5].y        = y +300;
-    txt[5].ancho    = ancho;
-    txt[5].alto     = alto;
-    txt[5].color    = negro;
-    txt[5].xfs      = xfs;
-    txt[5].id       = win_edit;
-    txt[5].gc       = gc_edit;
+    txt[5].x            = x;
+    txt[5].y            = y +300;
+    txt[5].ancho        = ancho;
+    txt[5].alto         = alto;
+    txt[5].color        = negro;
+    txt[5].xfs          = xfs;
+    txt[5].id           = win_edit;
+    txt[5].gc           = gc_edit;
+    txt[5].is_enabled   = True;
 
     //
     // Colocamos como activo el foco en txt[0]
@@ -354,6 +384,7 @@ void refreshUi(){
     XImage  *img[MAX_OPT_LANZADERA];
     char    *iconos[] = {
                         "./imagenes/abrir96.jpeg",
+                        "./imagenes/guardar96.jpeg",
                         "./imagenes/edit96.png",
                         "./imagenes/math96.png",
                         "./imagenes/grafica96.png",
@@ -414,18 +445,27 @@ void refreshEdit(){
     //
     switch(opt_funcion){
         case 0:
+            setFocus(getOldFocus(win_edit));
             pintaPolinomicas();
+            pintaEcuacion();
             break;
         case 1:
+            setFocus("");
             pintaTrigonometricas();
             break;
         case 2:
+            setFocus("");
             pintaExponenciales();
             break;
         case 3:
+            setFocus("");
             pintaLogaritmicas();
             break;
     }
+
+    //
+    // Pintamos la ecuacion
+    //
 
     //
     // Refrescamos el foco, con el ultimo control que tenia el foco
@@ -450,9 +490,6 @@ void refreshEdit(){
     XFillRectangle(dpy, win_edit, gc_edit, dat_win_edit.ancho -19, 0, 19, dat_win_edit.alto);
     XFillRectangle(dpy, win_edit, gc_edit, 0, y0 + 182, dat_win_edit.ancho, 18);
     XFillRectangle(dpy, win_edit, gc_edit, x0 -19, 0, 38, y0 + 183);
-
-
-
 }
 
 void refreshFocus(){
@@ -525,6 +562,8 @@ void pintaPolinomicas(){
     char        msg[1024];
     XFontStruct *xfs;
     int         x, y, ancho, alto;
+    int         grado;
+    int         g4, g3, g2, g1, cte;
 
     //
     // Primero hago un borrado del cuadro
@@ -575,6 +614,159 @@ void pintaPolinomicas(){
     sprintf(msg, "Cte.");
     setTexto(win_edit, gc_edit, msg, xfs, azul, x, y +300, ancho, alto);
     setEditText(win_edit, gc_edit, xfs, txt[5]);
+
+    //
+    // Segun el valor de grado inhabilitamos algunos txt
+    //
+    sscanf(txt[0].msg, "%d", &grado);
+    if(strcmp(txt[0].msg, "") ==  0){
+        txt[1].is_enabled = False;
+        txt[2].is_enabled = False;
+        txt[3].is_enabled = False;
+        txt[4].is_enabled = False;
+        txt[5].is_enabled = False;
+    }
+    else if(strcmp(txt[0].msg, "0") == 0){  // estamos ante una cte
+        txt[1].is_enabled = False;
+        txt[2].is_enabled = False;
+        txt[3].is_enabled = False;
+        txt[4].is_enabled = False;
+        txt[5].is_enabled = True;
+    }
+    else if(strcmp(txt[0].msg, "1") == 0){ // Ecuacion primer grado
+        txt[1].is_enabled = False;
+        txt[2].is_enabled = False;
+        txt[3].is_enabled = False;
+        txt[4].is_enabled = True;
+        txt[5].is_enabled = True;
+    }
+    else if(strcmp(txt[0].msg, "2") == 0){ // Ec. segundo grado
+        txt[1].is_enabled = False;
+        txt[2].is_enabled = False;
+        txt[3].is_enabled = True;
+        txt[4].is_enabled = True;
+        txt[5].is_enabled = True;
+    }
+    else if(strcmp(txt[0].msg, "3") == 0){  // ec. tercer grado
+        txt[1].is_enabled = False;
+        txt[2].is_enabled = True;
+        txt[3].is_enabled = True;
+        txt[4].is_enabled = True;
+        txt[5].is_enabled = True;
+    }
+    else if(strcmp(txt[0].msg, "4") == 0){  // ec. cuarto grado
+        txt[1].is_enabled = True;
+        txt[2].is_enabled = True;
+        txt[3].is_enabled = True;
+        txt[4].is_enabled = True;
+        txt[5].is_enabled = True;
+    }
+    else{
+        txt[1].is_enabled = False;
+        txt[2].is_enabled = False;
+        txt[3].is_enabled = False;
+        txt[4].is_enabled = False;
+        txt[5].is_enabled = False;
+    }
+
+    //
+    // Segun los valores pintamos la ecuacion
+    //
+    cte = g4 = g3 = g2 = g1 = 0;
+
+    sscanf(txt[1].msg, "%d", &g4);
+    sscanf(txt[2].msg, "%d", &g3);
+    sscanf(txt[3].msg, "%d", &g2);
+    sscanf(txt[4].msg, "%d", &g1);
+    sscanf(txt[5].msg, "%d", &cte);
+
+    polinomio[0] = cte;
+    polinomio[1] = g1;
+    polinomio[2] = g2;
+    polinomio[3] = g3;
+    polinomio[4] = g4;
+
+}
+
+char *polinomioToChar(){
+    char msg[1024], msg1[1024], msg2[1024];
+    char *ptr, *ptr1;
+    int cte, g1, g2, g3 ,g4;
+
+    msg[0] = '\0';
+
+    //
+    // Establecemos el grado del polinomio
+    //
+
+    cte = polinomio[0];
+    g1  = polinomio[1];
+    g2  = polinomio[2];
+    g3  = polinomio[3];
+    g4  = polinomio[4];
+
+    //
+    // empezamos con el grado 4
+    //
+    if(g4 == 0){ sprintf( msg1, "f(x) =");}
+    if(g4 < 0 && g4 != -1){sprintf(msg1, "f(x) = - %d*X(exp)4", abs(g4));}
+    if(g4 > 0 && g4 != 1){sprintf(msg1, "f(x) = %d*X(exp)4", g4);}
+    if(g4 == 1){sprintf(msg1, "f(x) = X(exp)4");}
+    if(g4 == -1){sprintf(msg1, "f(x) = - X(exp)4");}
+
+    //
+    // Grado 3
+    //
+    if(g3 == 0){sprintf(msg2, " ");}
+    if(g3 < 0 && g3 != -1){sprintf(msg2,  " - %d*X(exp)3", abs(g3));}
+    if(g3 > 0 && g3 !=1){sprintf(msg2, " +%d*X(exp)3", g3);}
+    if(g3 == 1){sprintf(msg2, " + X(exp)3");}
+    if(g3 == -1){sprintf(msg2, " - X(exp)3");}
+
+    ptr1 = strcat(msg1, msg2);
+    strcpy(msg, ptr1);
+    strcpy(msg1, msg);
+
+    //
+    // Grado 2
+    //
+    if(g2 == 0){sprintf(msg2, " ");}
+    if(g2 < 0 && g2 != -1){sprintf(msg2,  " - %d*X(exp)2", abs(g2));}
+    if(g2 > 0 && g2 !=1){sprintf(msg2, " + %d*X(exp)2", g2);}
+    if(g2 == 1){sprintf(msg2, " + X(exp)2");}
+    if(g2 == -1){sprintf(msg2, " - X(exp)2");}
+
+    ptr1 = strcat(msg1, msg2);
+    strcpy(msg, ptr1);
+    strcpy(msg1, msg);
+
+    //
+    // Grado 1
+    //
+    if(g1 == 0){sprintf(msg2, " ");}
+    if(g1 < 0 && g1 != -1){sprintf(msg2,  " - %d*X", abs(g1));}
+    if(g1 > 0 && g1 !=1){sprintf(msg2, " + %d*X", g1);}
+    if(g1 == 1){sprintf(msg2, " + X");}
+    if(g1 == -1){sprintf(msg2, " - X");}
+
+    ptr1 = strcat(msg1, msg2);
+    strcpy(msg, ptr1);
+    strcpy(msg1, msg);
+
+    //
+    // Cte
+    //
+    if(cte == 0){sprintf(msg2, " ");}
+    if(cte > 0){sprintf(msg2, " + %d", cte);}
+    if(cte < 0){sprintf(msg2, " - %d", abs(cte));}
+
+    ptr1 = strcat(msg1, msg2);
+    strcpy(msg, ptr1);
+    strcpy(msg1, msg);
+
+    ptr = &msg[0];
+
+    return ptr;
 }
 
 void pintaTrigonometricas(){
@@ -601,6 +793,48 @@ void pintaLogaritmicas(){
 
     XSetForeground(dpy, gc_edit, azul);
     XFillRectangle(dpy, win_edit, gc_edit, x0 + 22, 22, x0 -46, y0 +154);
+}
+
+void pintaEcuacion(){
+    int         x0 = (int)(dat_win_edit.ancho/2);
+    int         y0 = (int)(dat_win_edit.alto/2);
+    char        msg[1024];
+    char        *ptr;
+    XFontStruct *xfs;
+    int         x, y, ancho, alto;
+    int         len, ancho_c;
+
+    //
+    //Primero hago un borrado del cuadro
+    //
+    XSetForeground(dpy, gc_edit, dat_win_edit.back_color);
+    XFillRectangle(dpy, win_edit, gc_edit, 20, y0 + 200, dat_win_edit.ancho - 40, y0 - 220);
+
+    //
+    // Compruebo polinomio
+    //
+    if(opt_funcion == 0){
+        ptr = polinomioToChar();
+        strcpy(msg, ptr);
+    }
+
+    //
+    // Si la longitud de ecuacion es mayor que cero, Presento la ecuacion centrada
+    //
+    if(strlen(msg) > 0){
+
+        xfs = XLoadQueryFont(dpy, FONT_G);
+
+        len     = strlen(msg);
+        ancho   = XTextWidth(xfs, msg, strlen(msg));
+        ancho_c = (int) (ancho / len);
+        ancho   += (int) (2 * ancho_c);
+        alto    = 50;
+        x       = (int) x0 - (ancho / 2);
+        y       = (int) y0 + (y0 / 2) + 110;
+
+        setTexto(win_edit, gc_edit, msg, xfs, azul, x, y, ancho, alto);
+    }
 }
 
 void closeUi(){
@@ -937,14 +1171,16 @@ void setCursor(Datos txt){
 
 void setFocus(char *nombre){
     int i;
+    int focus_changed = False;
 
     //
     // Colocamos los valores is focused
     //
     i = 0;
     while(i<MAX_TXT){
-        if(strcmp(nombre, txt[i].nombre) == 0){
-            txt[i].is_focused = True;
+        if(strcmp(nombre, txt[i].nombre) == 0 && txt[i].is_enabled == True){
+            txt[i].is_focused   = True;
+            focus_changed       = True;
         }
         else{
             txt[i].is_focused = False;
@@ -952,7 +1188,7 @@ void setFocus(char *nombre){
         i++;
     }
 
-    if(strlen(nombre) > 0){
+    if(strlen(nombre) > 0 && focus_changed == True){
         strcpy(focus, nombre);
         strcpy(old_focus_edit, nombre);
     }
@@ -997,16 +1233,22 @@ void winLanzaderaClick(XEvent ev){
                 XMapRaised(dpy, win_abrir);
                 break;
             case 1:
+                setFocus(dat_win_guardar.nombre);
+                XMapRaised(dpy, win_guardar);
+                break;
+            case 2:
                 setFocus(getOldFocus(win_edit));
                 XMapRaised(dpy, win_edit);
                 break;
-            case 2:
+            case 3:
+                setFocus(dat_win_math.nombre);
                 XMapRaised(dpy, win_math);
                 break;
-            case 3:
+            case 4:
+                setFocus(dat_win_graf.nombre);
                 XMapRaised(dpy, win_graf);
                 break;
-            case 4:
+            case 5:
                 salir();
                 break;
         }
@@ -1114,11 +1356,23 @@ void winEditKeyPress(XEvent ev){
         }
     }
     //
-    // Si es ENTER pasamos el foco al siguiente control, y si es el ultimo
+    // Si es ENTER pasamos el foco al siguiente control activo, y si es el ultimo
     //
     else if(ev.xkey.keycode == ENTER || ev.xkey.keycode == RUN){
-        if(n_foco >= 0 && n_foco < MAX_TXT -1){
+        if(n_foco >= 0 && n_foco < MAX_TXT -1 && txt[n_foco + 1].is_enabled == True){
             setFocus(txt[n_foco + 1].nombre);
+        }
+        else if(n_foco >= 0 && n_foco < MAX_TXT -2 && txt[n_foco + 2].is_enabled == True){
+            setFocus(txt[n_foco + 2].nombre);
+        }
+        else if(n_foco >= 0 && n_foco < MAX_TXT -3 && txt[n_foco + 3].is_enabled == True){
+            setFocus(txt[n_foco + 3].nombre);
+        }
+        else if(n_foco >= 0 && n_foco < MAX_TXT -4 && txt[n_foco + 4].is_enabled == True){
+            setFocus(txt[n_foco + 4].nombre);
+        }
+        else if(n_foco >= 0 && n_foco < MAX_TXT -5 && txt[n_foco + 5].is_enabled == True){
+            setFocus(txt[n_foco + 5].nombre);
         }
         else{
             setFocus(dat_win_edit.nombre);

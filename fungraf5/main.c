@@ -23,7 +23,7 @@ int main(){
     //
     // Inicializamos los valores
     //
-    opt_lanzadera   = 1;
+    opt_lanzadera   = 2;
     opt_funcion     = 0;
 
     while(1){

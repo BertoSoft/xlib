@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1716107265 source:/home/alberto/programacion/2024/src/codeblock/xlib/fungraf5/main.c
+1716226944 source:/home/alberto/programacion/2024/src/codeblock/xlib/fungraf5/main.c
 	<stdio.h>
 	<stdlib.h>
 	<time.h>
@@ -8,9 +8,9 @@
 	<X11/XKBlib.h>
 	"ui.h"
 
-1716107184 /home/alberto/programacion/2024/src/codeblock/xlib/fungraf5/ui.h
+1716234475 /home/alberto/programacion/2024/src/codeblock/xlib/fungraf5/ui.h
 
-1716108774 source:/home/alberto/programacion/2024/src/codeblock/xlib/fungraf5/ui.c
+1716234787 source:/home/alberto/programacion/2024/src/codeblock/xlib/fungraf5/ui.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>

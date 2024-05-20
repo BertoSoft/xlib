@@ -50,7 +50,7 @@ typedef struct{
     unsigned long   color;
     unsigned long   back_color;
     int             is_focused;
-    int             is_cheked;
+    int             is_enabled;
     XFontStruct     *xfs;
     char            msg[1024];
 } Datos;
@@ -67,8 +67,9 @@ Window          win_lanzadera;
 Window          win_graf;
 Window          win_edit;
 Window          win_abrir;
+Window          win_guardar;
 Window          win_math;
-Datos           dat_scr, dat_lanzadera, dat_win_abrir, dat_win_edit, dat_win_math, dat_win_graf;
+Datos           dat_scr, dat_lanzadera, dat_win_abrir, dat_win_edit, dat_win_math, dat_win_graf, dat_win_guardar;
 GC              gc_scr;
 GC              gc_lanzadera;
 GC              gc_graf;
@@ -82,6 +83,7 @@ int             opt_lanzadera;
 int             opt_funcion;
 char            old_focus_edit[1024];
 char            focus[1024];
+int             polinomio[5];
 
 
 //
@@ -96,9 +98,11 @@ void            refreshUi();
 void            refreshEdit();
 void            pintaChkFunciones();
 void            pintaPolinomicas();
+char            *polinomioToChar();
 void            pintaTrigonometricas();
 void            pintaExponenciales();
 void            pintaLogaritmicas();
+void            pintaEcuacion();
 void            resizeWin(XEvent ev);
 void            salir();
 unsigned long   colorPorNombre(Display *dis, char *nombre);                                 // Devuelve el valor long del color a traves del nombre del color
