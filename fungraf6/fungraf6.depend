@@ -1,0 +1,20 @@
+# depslib dependency file v1.0
+1716321851 source:/home/alberto/programacion/2024/src/codeblock/xlib/fungraf6/ui.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<X11/Xlib.h>
+	<X11/Xutil.h>
+	<Imlib2.h>
+	"ui.h"
+
+1716321866 source:/home/alberto/programacion/2024/src/codeblock/xlib/fungraf6/main.c
+	<stdio.h>
+	<stdlib.h>
+	<X11/Xlib.h>
+	<X11/Xutil.h>
+	<X11/XKBlib.h>
+	"ui.h"
+
+1716321851 /home/alberto/programacion/2024/src/codeblock/xlib/fungraf6/ui.h
+

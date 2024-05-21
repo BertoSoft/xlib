@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_layout_file>
+	<FileVersion major="1" minor="0" />
+	<ActiveTarget name="Debug" />
+	<File name="ui.c" open="1" top="1" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="5476" topLine="177" />
+		</Cursor>
+		<Folding>
+			<Collapse line="205" />
+			<Collapse line="228" />
+			<Collapse line="290" />
+			<Collapse line="350" />
+			<Collapse line="369" />
+			<Collapse line="389" />
+			<Collapse line="416" />
+			<Collapse line="468" />
+		</Folding>
+	</File>
+	<File name="main.c" open="1" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="681" topLine="7" />
+		</Cursor>
+		<Folding>
+			<Collapse line="38" />
+			<Collapse line="54" />
+		</Folding>
+	</File>
+	<File name="ui.h" open="1" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1951" topLine="63" />
+		</Cursor>
+	</File>
+</CodeBlocks_layout_file>
