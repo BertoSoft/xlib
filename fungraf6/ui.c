@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
+#include <signal.h>
+#include <unistd.h>
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -8,8 +11,11 @@
 
 #include "ui.h"
 
+#define MAX_MENU    6       // Maximo de botones del menu
+#define BTN_MENU    100     // Ancho de los botones del menu
+
 void initUi(){
-    int ancho_pantalla, alto_pantalla;
+    int             ancho_scr, alto_scr;
 
     //
     // iniciamos las variables
@@ -18,8 +24,8 @@ void initUi(){
     scr             = DefaultScreen(dpy);
     blanco          = WhitePixel(dpy, scr);
     negro           = BlackPixel(dpy, scr);
-    ancho_pantalla  = DisplayWidth(dpy, scr);
-    alto_pantalla   = DisplayHeight(dpy, scr);
+    ancho_scr       = DisplayWidth(dpy, scr);
+    alto_scr        = DisplayHeight(dpy, scr);
 
     //
     //Iniciamos los colores
@@ -40,8 +46,8 @@ void initUi(){
                                 DefaultRootWindow(dpy),
                                 0,
                                 0,
-                                ancho_pantalla,
-                                alto_pantalla,
+                                ancho_scr,
+                                alto_scr,
                                 0,
                                 negro,
                                 blanco);
@@ -49,8 +55,8 @@ void initUi(){
     dat_scr.id          = win_scr;
     dat_scr.x           = 0;
     dat_scr.y           = 0;
-    dat_scr.ancho       = ancho_pantalla;
-    dat_scr.alto        = alto_pantalla;
+    dat_scr.ancho       = ancho_scr;
+    dat_scr.alto        = alto_scr;
     dat_scr.borde       = 0;
     dat_scr.color       = negro;
     dat_scr.back_color  = blanco;
@@ -60,20 +66,20 @@ void initUi(){
     //
     win_menu = XCreateSimpleWindow(dpy,
                                 win_scr,
-                                ancho_pantalla - 90 -100,
+                                ancho_scr - 90 -100,
                                 0,
                                 100,
-                                alto_pantalla -60,
+                                alto_scr -60,
                                 0,
                                 negro,
-                                gris_oscuro);
+                                azul);
 
     dat_menu.id            = win_menu;
-    dat_menu.x             = ancho_pantalla -90 -100;
+    dat_menu.x             = ancho_scr -90 -100;
     dat_menu.y             = 0;
     dat_menu.ancho         = 100;
+    dat_menu.alto          = alto_scr -60 -50;
     dat_menu.borde         = 0;
-    dat_menu.alto          = alto_pantalla -60;
     dat_menu.color         = negro;
     dat_menu.back_color    = azul;
 
@@ -84,8 +90,8 @@ void initUi(){
                             win_scr,
                             0,
                             0,
-                            ancho_pantalla -90 -100,
-                            alto_pantalla - 107,
+                            ancho_scr -90 -100,
+                            alto_scr - 60 -50,
                             0,
                             negro,
                             gris_claro);
@@ -97,8 +103,8 @@ void initUi(){
     dat_win.id          = win;
     dat_win.x           = 0;
     dat_win.y           = 0;
-    dat_win.ancho       = ancho_pantalla -90 -100;
-    dat_win.alto        = alto_pantalla -107;
+    dat_win.ancho       = ancho_scr -90 -100;
+    dat_win.alto        = alto_scr -107;
     dat_win.borde       = 0;
     dat_win.color       = negro;
     dat_win.back_color  = gris_claro;
@@ -110,8 +116,8 @@ void initUi(){
     win_inf = XCreateSimpleWindow(dpy,
                             win_scr,
                             0,
-                            alto_pantalla -108,
-                            ancho_pantalla -90 -100,
+                            alto_scr -108,
+                            ancho_scr -90 -100,
                             43,
                             0,
                             negro,
@@ -122,8 +128,8 @@ void initUi(){
     //
     dat_inf.id          = win_inf;
     dat_inf.x           = 0;
-    dat_inf.y           = alto_pantalla -108;
-    dat_inf.ancho       = ancho_pantalla -90 -100;
+    dat_inf.y           = alto_scr -108;
+    dat_inf.ancho       = ancho_scr -90 -100;
     dat_inf.alto        = 43;
     dat_inf.borde       = 0;
     dat_inf.color       = negro;
@@ -194,11 +200,11 @@ void resizeWin(XEvent ev){
     dat_menu.x      = dat_scr.ancho -103;
     dat_menu.y      = 1;
     dat_menu.ancho  = 100;
-    dat_menu.alto   = dat_scr.alto -4;
+    dat_menu.alto   = dat_scr.alto -48;
 
     dat_inf.x      = 0;
     dat_inf.y      = dat_scr.alto -47;
-    dat_inf.ancho  = dat_scr.ancho -105;
+    dat_inf.ancho  = dat_scr.ancho -4;
     dat_inf.alto   = 44;
 
 }
@@ -207,21 +213,19 @@ void closeUi(){
 
     XFreeGC(dpy, gc_menu);
     XFreeGC(dpy, gc_win);
-    XFreeGC(dpy, gc_scr);
     XFreeGC(dpy, gc_inf);
+    XFreeGC(dpy, gc_scr);
 
 
     XUnmapWindow(dpy, win_menu);
     XUnmapWindow(dpy, win);
-    XUnmapWindow(dpy, win_scr);
     XUnmapWindow(dpy, win_inf);
-
+    XUnmapWindow(dpy, win_scr);
 
     XDestroyWindow(dpy,win_menu);
     XDestroyWindow(dpy,win);
-    XDestroyWindow(dpy,win_scr);
     XDestroyWindow(dpy,win_inf);
-
+    XDestroyWindow(dpy,win_scr);
 
     XCloseDisplay(dpy);
 }
@@ -234,9 +238,7 @@ void salir(){
 
 void pintaUi(){
     int     i = 0;
-    int     btn_menu = 100;
-    int     max_menu = 6;
-    XImage  *img[max_menu];
+    XImage  *img[MAX_MENU];
     char    *iconos[] = {
                         "./imagenes/abrir96.jpeg",
                         "./imagenes/guardar96.jpeg",
@@ -257,7 +259,7 @@ void pintaUi(){
     // pintamos menu
     //
     i = 0;
-    while(i < max_menu){
+    while(i < MAX_MENU){
         //
         // Cargamos las imagenes
         //
@@ -265,14 +267,15 @@ void pintaUi(){
         if(img[i]){
             XPutImage(dpy, win_menu, gc_menu, img[i], 0, 0, 4, 4 + (i * 100), 92, 92);
         }
+
         //
         // creamos los efectos boton presionado
         //
         if(i == opt_menu){
-            setClick(dpy, win_menu, gc_menu, 3, 3 + (i*btn_menu), dat_menu.ancho -4, btn_menu -4);
+            setClick(dpy, win_menu, gc_menu, 3, 3 + (i*BTN_MENU), dat_menu.ancho -4, BTN_MENU -4);
         }
         else{
-            setUnClick(dpy, win_menu, gc_menu, 3, 3 + (i*btn_menu), dat_menu.ancho -4, btn_menu -4);
+            setUnClick(dpy, win_menu, gc_menu, 3, 3 + (i*BTN_MENU), dat_menu.ancho -4, BTN_MENU -4);
         }
         i++;
     }
@@ -280,12 +283,54 @@ void pintaUi(){
     //
     // pintamos la barra inf
     //
-    setClick(dpy, win_inf, gc_inf, 2, 2, dat_inf.ancho - 156, dat_inf.alto - 4);
-    setClick(dpy, win_inf, gc_inf, dat_inf.ancho -150, 2, 147, dat_inf.alto -4);
-
+    setClick(dpy, win_inf, gc_inf, 2, 2, (int) (dat_inf.ancho * 0.7), dat_inf.alto - 4);                                //  70%
+    setClick(dpy, win_inf, gc_inf, (int) (dat_inf.ancho * 0.7), 2, (int) (dat_inf.ancho * 0.2), dat_inf.alto - 4);      //  20%
+    setClick(dpy, win_inf, gc_inf, (int) (dat_inf.ancho * 0.9), 2, (int) (dat_inf.ancho * 0.1), dat_inf.alto -4);       //  10%
 
     XMapRaised(dpy, win_scr);
     XFlush(dpy);
+}
+
+void menuClick(XEvent ev){
+    int i;
+
+    //
+    // Cambiamos la opt_menu segun el boton pulsado
+    //
+    if(ev.xbutton.x > 0 && ev.xbutton.x < dat_menu.ancho){
+        i =0;
+        while(i < MAX_MENU){
+            if(ev.xbutton.y > (i * BTN_MENU) && ev.xbutton.y < (i * BTN_MENU) + BTN_MENU){
+                opt_menu = i;
+                i = MAX_MENU;
+            }
+            i++;
+        }
+    }
+
+    //
+    // Segun boton pulsado actuamos
+    //
+    switch(opt_menu){
+        case 0:
+            break;
+        case 1:
+            break;
+        case 2:
+            break;
+        case 3:
+            break;
+        case 4:
+            break;
+        case 5:
+            salir();
+            break;
+    }
+
+    //
+    // Pintamos la UI
+    //
+    pintaUi();
 }
 
 XImage *loadImagen(Display *display, Window w, char *ruta){
@@ -464,6 +509,44 @@ void setEditText(Window w, GC gc, XFontStruct *xfs, Datos txt_texto){
 
     setClick(dpy, w, gc, x, y, txt_texto.ancho, txt_texto.alto);
     setTexto(w, gc, msg_visual, txt_texto.xfs, txt_texto.color, x +8, txt_texto.y, txt_texto.ancho, txt_texto.alto);
+}
+
+void setFechaHora(){
+    char        msg[1024];
+    int         x, y, ancho, alto;
+    XFontStruct *xfs;
+    time_t      time_actual;
+    struct tm   *tm_fecha;
+
+
+    time_actual     = time(NULL);
+    tm_fecha        = localtime(&time_actual);
+    xfs             = XLoadQueryFont(dpy, FONT_N_B);
+
+    x       = (int) (dat_inf.ancho * 0.7) + 10;
+    y       = (int) (dat_inf.alto / 2) + 10;
+    ancho   = (int) (dat_inf.ancho * 0.18);
+    alto    = dat_inf.alto;
+
+    strftime(msg, 1023, "%A, %d de %B de %Y", tm_fecha);
+    XSetForeground(dpy, gc_inf, dat_inf.back_color);
+    XFillRectangle(dpy, win_inf, gc_inf, (int)(dat_inf.ancho * 0.7) + 2, 4, ancho, 46);
+    XSetForeground(dpy, gc_inf, dat_inf.color);
+    setTexto(win_inf, gc_inf, msg, xfs, negro, x, y, ancho, alto);
+
+    x       = (int) (dat_inf.ancho * 0.9) + 50;
+    y       = (int) (dat_inf.alto / 2) + 10;
+    ancho   = (int) (dat_inf.ancho * 0.1);
+    alto    = dat_inf.alto;
+
+    strftime(msg, 1023, "%X", tm_fecha);
+    XSetForeground(dpy, gc_inf, dat_inf.back_color);
+    XFillRectangle(dpy, win_inf, gc_inf, (int)(dat_inf.ancho * 0.9) + 2, 4, ancho, 46);
+    XSetForeground(dpy, gc_inf, dat_inf.color);
+
+    setTexto(win_inf, gc_inf, msg, xfs, negro, x, y, ancho, alto);
+
+
 }
 
 unsigned long colorPorNombre( Display *dis, char *nombre ){

@@ -1,6 +1,8 @@
 #ifndef UI_H_INCLUDED
 #define UI_H_INCLUDED
 
+#include <time.h>
+
 
 #define TITULO              "Funciones Graficas V1.0"
 #define ANCHO_MINIMO        1000
@@ -79,10 +81,12 @@ void            resizeWin(XEvent ev);
 void            closeUi();
 void            salir();
 void            pintaUi();
+void            menuClick(XEvent ev);
 void            setClick(Display *d, Window w, GC gc, int x, int y, int ancho, int alto);
 void            setUnClick(Display *d, Window w, GC gc, int x, int y, int ancho, int alto);
 void            setTexto(Window w, GC gc, char *msg, XFontStruct *xfs, unsigned long color, int x0, int y0, int ancho, int alto);
 void            setEditText(Window w, GC gc, XFontStruct *xfs, Datos txt_texto);
+void            setFechaHora();
 XImage          *loadImagen(Display *display, Window w, char *ruta);
 unsigned long   colorPorNombre( Display *dis, char *nombre );
 
