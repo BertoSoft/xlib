@@ -10,12 +10,26 @@
 #include <Imlib2.h>
 
 #include "ui.h"
+#include "grafica.h"
+#include "edit.h"
 
 #define MAX_MENU    6       // Maximo de botones del menu
 #define BTN_MENU    100     // Ancho de los botones del menu
 
 void initUi(){
-    int             ancho_scr, alto_scr;
+    int         ancho_scr, alto_scr;
+    time_t      time_0;
+    struct tm   *tm_0;
+
+    time_0  = time(NULL);
+    tm_0    = localtime(&time_0);
+    ano_0   = tm_0->tm_year + 1900;
+    mes_0   = tm_0->tm_mon + 1;
+    dia_0   = tm_0->tm_mday;
+    hora_0  = tm_0->tm_hour;
+    min_0   = tm_0->tm_min;
+    seg_0   = tm_0->tm_sec;
+    seg_old = 0;
 
     //
     // iniciamos las variables
@@ -26,6 +40,8 @@ void initUi(){
     negro           = BlackPixel(dpy, scr);
     ancho_scr       = DisplayWidth(dpy, scr);
     alto_scr        = DisplayHeight(dpy, scr);
+
+
 
     //
     //Iniciamos los colores
@@ -72,7 +88,7 @@ void initUi(){
                                 alto_scr -60,
                                 0,
                                 negro,
-                                azul);
+                                gris);
 
     dat_menu.id            = win_menu;
     dat_menu.x             = ancho_scr -90 -100;
@@ -81,7 +97,7 @@ void initUi(){
     dat_menu.alto          = alto_scr -60 -50;
     dat_menu.borde         = 0;
     dat_menu.color         = negro;
-    dat_menu.back_color    = azul;
+    dat_menu.back_color    = gris;
 
     //
     // creamos la ventana principal
@@ -130,7 +146,7 @@ void initUi(){
     dat_inf.x           = 0;
     dat_inf.y           = alto_scr -108;
     dat_inf.ancho       = ancho_scr -90 -100;
-    dat_inf.alto        = 43;
+    dat_inf.alto        = 33;
     dat_inf.borde       = 0;
     dat_inf.color       = negro;
     dat_inf.back_color  = gris;
@@ -195,15 +211,15 @@ void resizeWin(XEvent ev){
     dat_win.x       = 1;
     dat_win.y       = 1;
     dat_win.ancho   = dat_scr.ancho -107;
-    dat_win.alto    = dat_scr.alto -47;
+    dat_win.alto    = dat_scr.alto -37;
 
     dat_menu.x      = dat_scr.ancho -103;
     dat_menu.y      = 1;
     dat_menu.ancho  = 100;
-    dat_menu.alto   = dat_scr.alto -48;
+    dat_menu.alto   = dat_scr.alto -37;
 
     dat_inf.x      = 0;
-    dat_inf.y      = dat_scr.alto -47;
+    dat_inf.y      = dat_scr.alto -37;
     dat_inf.ancho  = dat_scr.ancho -4;
     dat_inf.alto   = 44;
 
@@ -286,6 +302,7 @@ void pintaUi(){
     setClick(dpy, win_inf, gc_inf, 2, 2, (int) (dat_inf.ancho * 0.7), dat_inf.alto - 4);                                //  70%
     setClick(dpy, win_inf, gc_inf, (int) (dat_inf.ancho * 0.7), 2, (int) (dat_inf.ancho * 0.2), dat_inf.alto - 4);      //  20%
     setClick(dpy, win_inf, gc_inf, (int) (dat_inf.ancho * 0.9), 2, (int) (dat_inf.ancho * 0.1), dat_inf.alto -4);       //  10%
+    setFechaHora();
 
     XMapRaised(dpy, win_scr);
     XFlush(dpy);
@@ -293,6 +310,27 @@ void pintaUi(){
 
 void menuClick(XEvent ev){
     int i;
+
+    //
+    // Cerramos la ventana actual
+    //
+    switch(opt_menu){
+        case 0:
+            break;
+        case 1:
+            break;
+        case 2:
+            closeEdit();
+            break;
+        case 3:
+            break;
+        case 4:
+            closeGrafica();
+            break;
+        case 5:
+            salir();
+            break;
+    }
 
     //
     // Cambiamos la opt_menu segun el boton pulsado
@@ -317,10 +355,12 @@ void menuClick(XEvent ev){
         case 1:
             break;
         case 2:
+            showEdit();
             break;
         case 3:
             break;
         case 4:
+            showGrafica();
             break;
         case 5:
             salir();
@@ -400,7 +440,7 @@ void setClick(Display *d, Window w, GC gc, int x, int y, int ancho, int alto){
     //
     // La linea h2 y v2 claras
     //
-    XSetForeground( d, gc, gris_claro);
+    XSetForeground( d, gc, blanco);
     XDrawLine( d, w, gc, x, y + alto, x + ancho, y + alto);                     // H2
     XDrawLine( d, w, gc, x + ancho, y, x + ancho, y + alto);                    // V2
 
@@ -419,7 +459,7 @@ void setUnClick(Display *d, Window w, GC gc, int x, int y, int ancho, int alto){
     //
     // La linea h1 y v1 claras
     //
-    XSetForeground( d, gc, gris_claro);
+    XSetForeground( d, gc, blanco);
     XDrawLine( d, w, gc, x, y, x + ancho, y);                                   // H1
     XDrawLine( d, w, gc, x, y, x, y + alto);                                    // V1
 
@@ -436,7 +476,12 @@ void setTexto(Window w, GC gc, char *msg, XFontStruct *xfs, unsigned long color,
     int tam_msg_pixels, tam_caracter, n_max_carcters;
     int tam;
 
-    tam_msg_pixels  = XTextWidth(xfs, msg, strlen(msg));
+    if(strlen(msg) == 0){
+        tam_msg_pixels = 0;
+    }
+    else{
+        tam_msg_pixels  = XTextWidth(xfs, msg, strlen(msg));
+    }
     if(tam_msg_pixels > 0){
         tam_caracter    = (int) (tam_msg_pixels / strlen(msg));
         n_max_carcters  = (int) (ancho / tam_caracter);
@@ -459,28 +504,21 @@ void setTexto(Window w, GC gc, char *msg, XFontStruct *xfs, unsigned long color,
     XDrawString(dpy, w, gc, x0, y0, msg, tam);
 }
 
-void setEditText(Window w, GC gc, XFontStruct *xfs, Datos txt_texto){
-    int     x   = txt_texto.x +5;
-    int     y   = txt_texto.y -(int) (txt_texto.alto / 2) - 10;
+void setEditText(Datos et){
+    int x, y;
     int     i, j;
     int     ancho_msg, max_caracters, ancho_caracter, len_msg;
     char    msg_visual[1024];
 
     //
-    // Dibujamos el cuadro blanco
-    //
-    XSetForeground(dpy, gc, blanco);
-    XFillRectangle(dpy, w, gc, x, y, txt_texto.ancho, txt_texto.alto);
-
-    //
     // Obtenemos los max caracteres a mostrar, y le restamos 2
     //
-    len_msg     = strlen(txt_texto.msg);
-    ancho_msg   = XTextWidth(xfs, txt_texto.msg, len_msg);
+    len_msg     = strlen(et.msg);
+    ancho_msg   = XTextWidth(et.xfs, et.msg, len_msg);
 
     if(ancho_msg > 0){
         ancho_caracter  = (int) (ancho_msg / len_msg);
-        max_caracters   = (int) (txt_texto.ancho / ancho_caracter);
+        max_caracters   = (int) (et.ancho / ancho_caracter);
     }
     else{
         ancho_caracter  = 0;
@@ -498,54 +536,53 @@ void setEditText(Window w, GC gc, XFontStruct *xfs, Datos txt_texto){
         j = 0;
         msg_visual[max_caracters +1]   = '\0';
         while(j < max_caracters){
-            msg_visual[i] = txt_texto.msg[len_msg -1 -j];
+            msg_visual[i] = et.msg[len_msg -1 -j];
             i--;
             j++;
         }
     }
     else{
-        strcpy(msg_visual, txt_texto.msg);
+        strcpy(msg_visual, et.msg);
     }
 
-    setClick(dpy, w, gc, x, y, txt_texto.ancho, txt_texto.alto);
-    setTexto(w, gc, msg_visual, txt_texto.xfs, txt_texto.color, x +8, txt_texto.y, txt_texto.ancho, txt_texto.alto);
+    setClick(dpy, et.id, et.gc, 2, 2, et.ancho - 4, et.alto - 4);
+
+    x = 9;
+    y = (int)(et.alto / 2) + 7;
+    setTexto(et.id, et.gc, msg_visual, et.xfs, et.color, x, y, et.ancho, et.alto);
+
 }
 
 void setFechaHora(){
-    char        msg[1024];
-    int         x, y, ancho, alto;
-    XFontStruct *xfs;
-    time_t      time_actual;
-    struct tm   *tm_fecha;
+    char            msg[1024];
+    int             x, y, ancho, alto;
+    XFontStruct     *xfs;
+    time_t          time_actual;
+    struct tm       *tm_actual;
 
-
-    time_actual     = time(NULL);
-    tm_fecha        = localtime(&time_actual);
-    xfs             = XLoadQueryFont(dpy, FONT_N_B);
+    time_actual = time(NULL);
+    tm_actual   = localtime(&time_actual);
+    xfs         = XLoadQueryFont(dpy, FONT_N_B);
 
     x       = (int) (dat_inf.ancho * 0.7) + 10;
-    y       = (int) (dat_inf.alto / 2) + 10;
+    y       = (int) (dat_inf.alto / 2) + 5;
     ancho   = (int) (dat_inf.ancho * 0.18);
     alto    = dat_inf.alto;
 
-    strftime(msg, 1023, "%A, %d de %B de %Y", tm_fecha);
+    strftime(msg, 1023, "%A, %d de %B de %Y", tm_actual);
     XSetForeground(dpy, gc_inf, dat_inf.back_color);
     XFillRectangle(dpy, win_inf, gc_inf, (int)(dat_inf.ancho * 0.7) + 2, 4, ancho, 46);
-    XSetForeground(dpy, gc_inf, dat_inf.color);
-    setTexto(win_inf, gc_inf, msg, xfs, negro, x, y, ancho, alto);
+    setTexto(win_inf, gc_inf, msg, xfs, azul, x, y, ancho, alto);
 
     x       = (int) (dat_inf.ancho * 0.9) + 50;
-    y       = (int) (dat_inf.alto / 2) + 10;
+    y       = (int) (dat_inf.alto / 2) + 5;
     ancho   = (int) (dat_inf.ancho * 0.1);
     alto    = dat_inf.alto;
 
-    strftime(msg, 1023, "%X", tm_fecha);
+    strftime(msg, 1023, "%X", tm_actual);
     XSetForeground(dpy, gc_inf, dat_inf.back_color);
     XFillRectangle(dpy, win_inf, gc_inf, (int)(dat_inf.ancho * 0.9) + 2, 4, ancho, 46);
-    XSetForeground(dpy, gc_inf, dat_inf.color);
-
-    setTexto(win_inf, gc_inf, msg, xfs, negro, x, y, ancho, alto);
-
+    setTexto(win_inf, gc_inf, msg, xfs, azul, x, y, ancho, alto);
 
 }
 

@@ -52,6 +52,7 @@ typedef struct{
     unsigned long   back_color;
     int             is_focused;
     int             is_enabled;
+    int             is_cheked;
     XFontStruct     *xfs;
     char            msg[1024];
 } Datos;
@@ -71,6 +72,7 @@ unsigned long   azul, azure, rojo;
 unsigned long   amarillo, gris, gris_claro;
 unsigned long   gris_oscuro, purpura;
 int             opt_menu;
+int             dia_0, mes_0, ano_0, hora_0, min_0, seg_0, seg_old;
 
 
 //
@@ -81,11 +83,12 @@ void            resizeWin(XEvent ev);
 void            closeUi();
 void            salir();
 void            pintaUi();
+void            pintaFuncion();
 void            menuClick(XEvent ev);
 void            setClick(Display *d, Window w, GC gc, int x, int y, int ancho, int alto);
 void            setUnClick(Display *d, Window w, GC gc, int x, int y, int ancho, int alto);
 void            setTexto(Window w, GC gc, char *msg, XFontStruct *xfs, unsigned long color, int x0, int y0, int ancho, int alto);
-void            setEditText(Window w, GC gc, XFontStruct *xfs, Datos txt_texto);
+void            setEditText(Datos txt_texto);
 void            setFechaHora();
 XImage          *loadImagen(Display *display, Window w, char *ruta);
 unsigned long   colorPorNombre( Display *dis, char *nombre );

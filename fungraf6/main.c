@@ -8,8 +8,13 @@
 #include <X11/XKBlib.h>     // Para usar xkbKeycodeToKeysyn
 
 #include "ui.h"
+#include "edit.h"
 
-void* reloj (void* q);
+void gesExpose(XEvent ev);
+void gesConfigureNotify(XEvent ev);
+void gesButtonPress(XEvent ev);
+void gesKeyPress(XEvent ev);
+void gesVisibilityNotify(XEvent ev);
 
 int main(){
     XEvent      ev;
@@ -22,77 +27,86 @@ int main(){
     //
     // Iniciamos los valores
     //
-    //opt_menu = 2;
+    opt_menu    = 2;
+    showEdit();
 
     //
     //Loop
     //
     while(1){
         setFechaHora();
+
         //
         // Si hay algun evento lo procesamos
         //
         while(QLength(dpy) > 0){
             XNextEvent(dpy, &ev);
 
-            //
-            // Eventos de la Ventana scr
-            //
-            if(ev.xfocus.window == win_scr){
-                switch(ev.type){
-                    case Expose:
-                        // Si es la ultima interuccion del evento expose
-                        if( ev.xexpose.count == 0 ){
-                        pintaUi();
-                        }
-                        break;
-
-                    case ConfigureNotify:
-                        resizeWin(ev);
-                        break;
-                }
-            }
-
-            //
-            // Eventos de la ventana menu
-            //
-            if( ev.xfocus.window == win_menu ){
-                switch(ev.type){
-                    case ButtonPress:
-                        menuClick(ev);
-                        break;
-
-                    case KeyPress:
-                        if(ev.xkey.keycode == ESC){
-                            salir();
-                        }
-                        break;
-                }
-            }
-
-            //
-            // Eventos de la ventana win
-            //
-            if( ev.xfocus.window == win){
-                switch(ev.type){
-                    case Expose:
-                        // Si es la ultima interuccion del evento expose
-                        if( ev.xexpose.count == 0 ){
-                        }
-                        break;
-
-                    case KeyPress:
-                        if(ev.xkey.keycode == ESC){
-                            salir();
-                        }
-                        break;
-
-                    case ButtonPress:
-                        break;
-                }
+            switch(ev.type){
+                case Expose:
+                    if( ev.xexpose.count == 0 ){
+                        gesExpose(ev);
+                    }
+                    break;
+                case ConfigureNotify:
+                    gesConfigureNotify(ev);
+                    break;
+                case ButtonPress:
+                    gesButtonPress(ev);
+                    break;
+                case KeyPress:
+                    gesKeyPress(ev);
+                    break;
             }
         }
     }
 }
 
+void gesExpose(XEvent ev){
 
+    if(ev.xfocus.window == win_scr){
+        pintaUi();
+    }
+    if(ev.xfocus.window == w_edit){
+        pintaEdit();
+    }
+}
+
+void gesConfigureNotify(XEvent ev){
+
+    if(ev.xfocus.window == win_scr){
+        resizeWin(ev);
+    }
+}
+
+void gesButtonPress(XEvent ev){
+    int i;
+
+    if(ev.xfocus.window == win_menu){
+        menuClick(ev);
+    }
+
+    i = 0;
+    while(i < 4){
+        if(ev.xfocus.window == chk[i].id){
+            editClick(ev);
+        }
+        i++;
+    }
+
+}
+
+void gesKeyPress(XEvent ev){
+
+    if(ev.xfocus.window == win_menu && ev.xkey.keycode == ESC){
+        salir();
+    }
+
+    if(ev.xfocus.window == win && ev.xkey.keycode == ESC){
+        salir();
+    }
+
+    if(ev.xfocus.window == w_edit && ev.xkey.keycode == ESC){
+        salir();
+    }
+}

@@ -38,6 +38,14 @@
 		<Linker>
 			<Add library="pthread" />
 		</Linker>
+		<Unit filename="edit.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="edit.h" />
+		<Unit filename="grafica.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="grafica.h" />
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
