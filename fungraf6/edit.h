@@ -7,20 +7,18 @@ Window          w_edit;
 GC              gc_edit;
 Datos           dat_edit;
 
-//
-// Declaramos los datos de los controles
-//
-Datos   chk[4];
-Datos   et[6];
-
 void initEdit();
-void initControls();
+void initChks();
+void initControlsPolinomicos();
 void closeEdit();
+void closeControlsPolinomicos();
 void showEdit();
+void setFocusEt(int opt);
 void pintaEdit();
 void pintaTipoFuncion();
 void pintaDatosFuncion();
 void pintaDatosPolinomicas();
+void pintaDatosTrigonometricos();
 void editClick(XEvent ev);
 
 

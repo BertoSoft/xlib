@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 #include <unistd.h>
 
 #include <X11/Xlib.h>
@@ -14,7 +15,7 @@ void gesExpose(XEvent ev);
 void gesConfigureNotify(XEvent ev);
 void gesButtonPress(XEvent ev);
 void gesKeyPress(XEvent ev);
-void gesVisibilityNotify(XEvent ev);
+void colorCursor(int s);
 
 int main(){
     XEvent      ev;
@@ -31,10 +32,17 @@ int main(){
     showEdit();
 
     //
+    // Iniciamos la alarma de 0,5 seg
+    //
+    ualarm(500000, 1);
+    signal(SIGALRM, colorCursor);
+
+    //
     //Loop
     //
     while(1){
         setFechaHora();
+        pintaCursor();
 
         //
         // Si hay algun evento lo procesamos
@@ -109,4 +117,17 @@ void gesKeyPress(XEvent ev){
     if(ev.xfocus.window == w_edit && ev.xkey.keycode == ESC){
         salir();
     }
+}
+
+void colorCursor(int s){
+
+    if(color_cursor == True){
+        color_cursor = False;
+    }
+    else{
+        color_cursor = True;
+    }
+    signal(SIGALRM, SIG_IGN); /* ignore this signal */
+    ualarm(500000, 1);
+    signal(SIGALRM, colorCursor);
 }

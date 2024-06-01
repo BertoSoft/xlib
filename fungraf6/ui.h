@@ -36,6 +36,10 @@
 #define FONT_N_B            "9x15bold"
 #define FONT_N              "9x15"
 
+#define MAX_ET      9       // Maximo numero de editText
+#define MAX_CHK     4       // maximo numero de chks
+
+
 //
 // Structuras
 //
@@ -57,7 +61,11 @@ typedef struct{
     char            msg[1024];
 } Datos;
 
-
+//
+// Declaramos los datos de los controles
+//
+Datos   chk[4];
+Datos   et[9];
 
 //
 // Variables
@@ -71,8 +79,8 @@ unsigned long   blanco, negro;
 unsigned long   azul, azure, rojo;
 unsigned long   amarillo, gris, gris_claro;
 unsigned long   gris_oscuro, purpura;
+int             color_cursor;
 int             opt_menu;
-int             dia_0, mes_0, ano_0, hora_0, min_0, seg_0, seg_old;
 
 
 //
@@ -90,6 +98,7 @@ void            setUnClick(Display *d, Window w, GC gc, int x, int y, int ancho,
 void            setTexto(Window w, GC gc, char *msg, XFontStruct *xfs, unsigned long color, int x0, int y0, int ancho, int alto);
 void            setEditText(Datos txt_texto);
 void            setFechaHora();
+void            pintaCursor();
 XImage          *loadImagen(Display *display, Window w, char *ruta);
 unsigned long   colorPorNombre( Display *dis, char *nombre );
 

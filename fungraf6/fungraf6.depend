@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1716925520 source:/home/alberto/programacion/2024/src/codeblock/xlib/fungraf6/ui.c
+1717236713 source:/home/alberto/programacion/2024/src/codeblock/xlib/fungraf6/ui.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
@@ -13,10 +13,11 @@
 	"grafica.h"
 	"edit.h"
 
-1716836907 source:/home/alberto/programacion/2024/src/codeblock/xlib/fungraf6/main.c
+1717239640 source:/home/alberto/programacion/2024/src/codeblock/xlib/fungraf6/main.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
+	<signal.h>
 	<unistd.h>
 	<X11/Xlib.h>
 	<X11/Xutil.h>
@@ -24,7 +25,7 @@
 	"ui.h"
 	"edit.h"
 
-1716921110 /home/alberto/programacion/2024/src/codeblock/xlib/fungraf6/ui.h
+1717185169 /home/alberto/programacion/2024/src/codeblock/xlib/fungraf6/ui.h
 	<time.h>
 
 1716746141 source:/home/alberto/programacion/2024/src/codeblock/xlib/fungraf6/grafica.c
@@ -40,7 +41,7 @@
 1716743851 /home/alberto/programacion/2024/src/codeblock/xlib/fungraf6/grafica.h
 	"ui.h"
 
-1716926054 source:/home/alberto/programacion/2024/src/codeblock/xlib/fungraf6/edit.c
+1717237077 source:/home/alberto/programacion/2024/src/codeblock/xlib/fungraf6/edit.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
@@ -51,6 +52,6 @@
 	"ui.h"
 	"grafica.h"
 
-1716925729 /home/alberto/programacion/2024/src/codeblock/xlib/fungraf6/edit.h
+1717184925 /home/alberto/programacion/2024/src/codeblock/xlib/fungraf6/edit.h
 	"ui.h"
 

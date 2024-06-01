@@ -17,19 +17,17 @@
 #define BTN_MENU    100     // Ancho de los botones del menu
 
 void initUi(){
-    int         ancho_scr, alto_scr;
-    time_t      time_0;
-    struct tm   *tm_0;
+    int ancho_scr, alto_scr;
+    int i;
 
-    time_0  = time(NULL);
-    tm_0    = localtime(&time_0);
-    ano_0   = tm_0->tm_year + 1900;
-    mes_0   = tm_0->tm_mon + 1;
-    dia_0   = tm_0->tm_mday;
-    hora_0  = tm_0->tm_hour;
-    min_0   = tm_0->tm_min;
-    seg_0   = tm_0->tm_sec;
-    seg_old = 0;
+    //
+    // Iniciamos los valores de los controles
+    //
+    i = 0;
+    while(i < MAX_ET){
+        et[0].is_enabled = False;
+        i++;
+    }
 
     //
     // iniciamos las variables
@@ -54,6 +52,11 @@ void initUi(){
     gris        = colorPorNombre(dpy, "gray");
     gris_oscuro = colorPorNombre(dpy, "DarkSlateGray");
     gris_claro  = colorPorNombre(dpy, "LightGray");
+
+    //
+    // Establecemos color de cursor en True
+    //
+    color_cursor = True;
 
     //
     // creamos la ventana scr
@@ -112,10 +115,6 @@ void initUi(){
                             negro,
                             gris_claro);
 
-
-    //
-    // Establecemos las propiedades de win
-    //
     dat_win.id          = win;
     dat_win.x           = 0;
     dat_win.y           = 0;
@@ -139,9 +138,6 @@ void initUi(){
                             negro,
                             gris);
 
-    //
-    // Establecemos las propiedades de win_inf
-    //
     dat_inf.id          = win_inf;
     dat_inf.x           = 0;
     dat_inf.y           = alto_scr -108;
@@ -583,6 +579,81 @@ void setFechaHora(){
     XSetForeground(dpy, gc_inf, dat_inf.back_color);
     XFillRectangle(dpy, win_inf, gc_inf, (int)(dat_inf.ancho * 0.9) + 2, 4, ancho, 46);
     setTexto(win_inf, gc_inf, msg, xfs, azul, x, y, ancho, alto);
+
+}
+
+void pintaCursor(){
+    int             i;
+    int             x, y0, y1;
+    int             hay_ets;
+    int             et_focused  = -1;
+    int             ancho_et;
+    unsigned long   color;
+
+    //
+    // Comprobamos si hay et activos
+    //
+    i           = 0;
+    hay_ets     = False;
+    while(i < MAX_ET){
+            int f = et[0].is_enabled;
+        if(et[i].is_enabled == True){
+            hay_ets = True;
+            i = MAX_ET;
+        }
+        i++;
+    }
+
+    //
+    // Si hay ets activos miramos si hay foco
+    //
+    et_focused = -1;
+    if(hay_ets == True){
+        i = 0;
+        while(i <  MAX_ET){
+            if(et[i].is_focused == True){
+                et_focused = i;
+                i = MAX_ET;
+            }
+            i++;
+        }
+    }
+
+    //
+    // Si hay et activos y ademas hay foco, pintamos la linea
+    //
+    if(hay_ets == True && et_focused >= 0){
+
+        //
+        // Primero el color
+        //
+        if(color_cursor == True){
+            color = et[et_focused].color;
+        }
+        else{
+            color = et[et_focused].back_color;
+        }
+
+        //
+        // Ahora el ancho de msg
+        //
+        if(strlen(et[et_focused].msg) == 0){
+            ancho_et = 0;
+        }
+        else{
+            ancho_et = XTextWidth(et[et_focused].xfs, et[et_focused].msg, strlen(et[et_focused].msg));
+        }
+
+        x   = ancho_et + 12;
+        y0  = 8;
+        y1  = et[et_focused].alto -5;
+
+        XSetLineAttributes( dpy, et[et_focused].gc, 3, LineSolid, CapRound, JoinMiter);
+        XSetForeground(dpy, et[et_focused].gc, color);
+        XDrawLine(dpy, et[et_focused].id, et[et_focused].gc, x, y0, x, y1);
+    }
+
+
 
 }
 
