@@ -5,6 +5,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <Imlib2.h>
+#include <X11/XKBlib.h>     // Para usar xkbKeycodeToKeysyn
 
 #include "edit.h"
 #include "ui.h"
@@ -37,7 +38,7 @@ void initEdit(){
     //
     // Establecemos los tipos de eventos que queremos en la ventana principal
     //
-    XSelectInput(dpy, w_edit, VisibilityChangeMask | ExposureMask | ButtonPressMask | KeyPressMask);
+    XSelectInput(dpy, w_edit, ExposureMask | ButtonPressMask | KeyPressMask);
 
     //
     // Creamos el gc
@@ -62,31 +63,33 @@ void initChks(){
     y = 105;
     i = 0;
     while(i<4){
-        chk[i].id = XCreateSimpleWindow(dpy,
-                            w_edit,
-                            x,
-                            y + (i * 50),
-                            20,
-                            20,
-                            0,
-                            dat_edit.color,
-                            dat_edit.back_color);
-
-        XSelectInput(dpy, chk[i].id, ButtonPressMask);
-
-        chk[i].x            = x - 2;
+        chk[i].id           = i;
+        chk[i].x            = x;
         chk[i].y            = y + (i * 50) - 2;
-        chk[i].ancho        = 24;
-        chk[i].alto         = 24;
+        chk[i].ancho        = 25;
+        chk[i].alto         = 25;
         chk[i].is_cheked    = False;
 
         i++;
     }
 
     //
-    // Iniciamos en opt == 0, como predeterminada
+    // Iniciamos en opt == 0, como predeterminada, sino  el antiguo chk_old
     //
-    chk[0].is_cheked = True;
+    if(chk_opt < 0){
+        setChkCheked(chk_old);
+        chk_opt = chk_old;
+
+    }
+    else{
+        chk[0].is_cheked = True;
+        chk_opt = 0;
+        chk_old = 0;
+    }
+
+    //
+    // Iniciamos los controles
+    //
     initControlsPolinomicos();
 
     //
@@ -114,19 +117,9 @@ void initControlsPolinomicos(){
     //
     // et[0] = et_grado
     //
-    et[0].id = XCreateSimpleWindow(dpy,
-                                w_edit,
-                                x,
-                                y ,
-                                ancho,
-                                alto,
-                                0,
-                                color,
-                                blanco);
-
-    XSelectInput(dpy, et[0].id, ButtonPressMask | KeyPressMask);
-
     sprintf(et[0].nombre, "et_grado");
+    et[0].id = 0;
+    et[0].padre     = w_edit;
     et[0].x         = x;
     et[0].y         = y;
     et[0].ancho     = ancho;
@@ -134,7 +127,7 @@ void initControlsPolinomicos(){
     et[0].color     = color;
     et[0].back_color= back_color;
     et[0].xfs       = XLoadQueryFont(dpy, FONT_N_B);
-    et[0].gc        = XCreateGC(dpy, et[0].id, 0, 0);
+    et[0].gc        = gc_edit;
 
     //
     // Coef.
@@ -147,18 +140,8 @@ void initControlsPolinomicos(){
 
     while(i<6){
 
-        et[i].id = XCreateSimpleWindow(dpy,
-                                    w_edit,
-                                    x,
-                                    y + (int)(i * 60),
-                                    ancho,
-                                    alto,
-                                    0,
-                                    color,
-                                    blanco);
-
-        XSelectInput(dpy, et[i].id, ButtonPressMask | KeyPressMask);
-
+        et[i].id        = i;
+        et[i].padre     = w_edit;
         et[i].x         = x;
         et[i].y         = y + (int)(i * 60);
         et[i].ancho     = ancho;
@@ -166,10 +149,17 @@ void initControlsPolinomicos(){
         et[i].color     = color;
         et[i].back_color= back_color;
         et[i].xfs       = XLoadQueryFont(dpy, FONT_N_B);
-        et[i].gc        = XCreateGC(dpy, et[i].id, 0, 0);
+        et[i].gc        = gc_edit;
 
         i++;
     }
+
+    sprintf(et[1].nombre, "et_grado_4");
+    sprintf(et[2].nombre, "et_grado_3");
+    sprintf(et[3].nombre, "et_grado_2");
+    sprintf(et[4].nombre, "et_grado_1");
+    sprintf(et[5].nombre, "et_coef");
+
 
     //
     // limites
@@ -181,18 +171,8 @@ void initControlsPolinomicos(){
     i       = 6;
 
     while(i<8){
-        et[i].id = XCreateSimpleWindow(dpy,
-                                    w_edit,
-                                    x,
-                                    y + (int)((i - 6) * 40),
-                                    ancho,
-                                    alto,
-                                    0,
-                                    color,
-                                    blanco);
-
-        XSelectInput(dpy, et[i].id, ButtonPressMask | KeyPressMask);
-
+        et[i].id        = i;
+        et[i].padre     = w_edit;
         et[i].x         = x;
         et[i].y         = y + (int)((i - 6) * 40);
         et[i].ancho     = ancho;
@@ -200,10 +180,13 @@ void initControlsPolinomicos(){
         et[i].color     = color;
         et[i].back_color= back_color;
         et[i].xfs       = XLoadQueryFont(dpy, FONT_N_B);
-        et[i].gc        = XCreateGC(dpy, et[i].id, 0, 0);
+        et[i].gc        = gc_edit;
 
         i++;
     }
+    sprintf(et[6].nombre, "lim_inf");
+    sprintf(et[7].nombre, "lim_sup");
+
 
     //
     // Epsilon
@@ -212,63 +195,47 @@ void initControlsPolinomicos(){
     y       = 300;
     ancho   = 100;
     alto    = 30;
-    et[8].id = XCreateSimpleWindow(dpy,
-                                w_edit,
-                                x,
-                                y,
-                                ancho,
-                                alto,
-                                0,
-                                color,
-                                blanco);
 
-    XSelectInput(dpy, et[8].id, ButtonPressMask | KeyPressMask);
-
-    et[i].x         = x;
-    et[i].y         = y;
-    et[i].ancho     = ancho;
-    et[i].alto      = alto;
-    et[i].color     = color;
-    et[i].back_color= back_color;
-    et[i].xfs       = XLoadQueryFont(dpy, FONT_N_B);
-    et[i].gc        = XCreateGC(dpy, et[8].id, 0, 0);
+    sprintf(et[8].nombre, "epsilon");
+    et[8].id        = 8;
+    et[8].padre     = w_edit;
+    et[8].x         = x;
+    et[8].y         = y;
+    et[8].ancho     = ancho;
+    et[8].alto      = alto;
+    et[8].color     = color;
+    et[8].back_color= back_color;
+    et[8].xfs       = XLoadQueryFont(dpy, FONT_N_B);
+    et[8].gc        = gc_edit;
 
     //
-    // Colocamos todos los ets como activos
+    // Colocamos todos los ets como activos solo si chk_opt = 0;
     //
-    i = 0;
-    while(i < MAX_ET){
-        et[i].is_enabled = True;
-        i++;
+    if(chk_opt == 0){
+        setEtEnabled(True);
     }
-
-    //
-    // Mapeamos la pantalla
-    //
-    XMapSubwindows(dpy, w_edit);
-    XFlush(dpy);
-
+    else{
+        setEtEnabled(False);
+    }
 }
 
 void closeEdit(){
 
+    //
+    // Grabamos el old_chk
+    //
+    chk_old = chk_opt;
+    chk_opt = -1;
+
+
+    //
+    // Desactivamos los controles
+    //
+    setEtEnabled(False);
+
     XFreeGC(dpy, gc_edit);
     XUnmapWindow(dpy, w_edit);
     XDestroyWindow(dpy, w_edit);
-}
-
-void closeControlsPolinomicos(){
-    int i;
-
-    i = 0;
-    while(i<MAX_ET){
-
-        XFreeGC(dpy, et[i].gc);
-        XUnmapWindow(dpy, et[i].id);
-        XDestroyWindow(dpy, et[i].id);
-        et[i].is_enabled = False;
-        i++;
-    }
 }
 
 void showEdit(){
@@ -291,6 +258,25 @@ void setFocusEt(int opt){
             et[i].is_focused = False;
         }
         i++;
+    }
+}
+
+void setEtEnabled(int activo){
+    int i;
+
+    if(activo == True){
+        i = 0;
+        while(i < MAX_ET){
+            et[i].is_enabled = True;
+            i++;
+        }
+    }
+    else{
+        i = 0;
+        while(i < MAX_ET){
+            et[i].is_enabled = False;
+            i++;
+        }
     }
 }
 
@@ -362,6 +348,22 @@ void pintaDatosFuncion(){
     // Segun chk pintamos  datos
     //
     if(chk[0].is_cheked){
+
+        //
+        // Si chk_opt != 0 activamos los controles
+        //
+        if(chk_opt != 0){
+            setEtEnabled(True);
+        }
+
+        //
+        // Cambiamos el valor de chk_opt
+        //
+        chk_opt = 0;
+
+        //
+        // Pintamos
+        //
         pintaDatosPolinomicas();
     }
 
@@ -369,8 +371,72 @@ void pintaDatosFuncion(){
     // Trigonometricos
     //
     if(chk[1].is_cheked){
+
+        //
+        // Si chk_opt == 0, desactivamos sus controles
+        //
+        if(chk_opt == 0 || chk_opt < 0){
+            setEtEnabled(False);
+        }
+
+        //
+        // Colocamos el nuevo valor de chk_opt
+        //
+        chk_opt = 1;
+
+        //
+        // Pintamos
+        //
         pintaDatosTrigonometricos();
     }
+
+    //
+    // Exponenciales
+    //
+    if(chk[2].is_cheked){
+
+        //
+        // Si chk_opt == 0, desactivamos sus controles
+        //
+        if(chk_opt == 0 || chk_opt < 0){
+            setEtEnabled(False);
+        }
+
+        //
+        // Colocamos el nuevo valor de chk_opt
+        //
+        chk_opt = 2;
+
+        //
+        // Pintamos
+        //
+        pintaDatosExponenciales();
+    }
+
+    //
+    // Logaritmicas
+    //
+    if(chk[3].is_cheked){
+
+        //
+        // Si chk_opt == 0, desactivamos sus controles
+        //
+        if(chk_opt == 0 || chk_opt < 0){
+            setEtEnabled(False);
+        }
+
+        //
+        // Colocamos el nuevo valor de chk_opt
+        //
+        chk_opt = 3;
+
+        //
+        // Pintamos
+        //
+        pintaDatosLogaritmicos();
+    }
+
+
 
 }
 
@@ -378,10 +444,6 @@ void pintaDatosPolinomicas(){
     int             x, y, ancho, alto;
     char            msg[1024];
     XFontStruct     *xfs;
-
-    //
-    // Iniciamos los controles
-    //
 
     //
     // Pintamos los cuadros
@@ -476,30 +538,27 @@ void pintaDatosPolinomicas(){
     setTexto(w_edit, gc_edit, msg, xfs, dat_edit.color, x + 50, y + 60, 400, 25);
     setEditText(et[8]);
 
+
 }
 
 void pintaDatosTrigonometricos(){
 
+}
+
+void pintaDatosExponenciales(){
 
 }
 
-void editClick(XEvent ev){
+void pintaDatosLogaritmicos(){
+
+}
+
+void setChkCheked(Window id){
     int i;
 
-    //
-    // Cerramos los controles del antiguo chk pulsado
-    //
-    if(chk[0].is_cheked == True){
-            closeControlsPolinomicos();
-    }
-
-
-    //
-    // ponemos el nuevo chk como pulsado
-    //
     i = 0;
-    while(i < MAX_CHK){
-        if(ev.xfocus.window == chk[i].id){
+    while(i< MAX_CHK){
+        if(chk[i].id == id){
             chk[i].is_cheked = True;
         }
         else{
@@ -507,13 +566,315 @@ void editClick(XEvent ev){
         }
         i++;
     }
+}
+
+void editClick(XEvent ev){
+    int i;
+    int x, y, x0, x1, y0, y1;
 
     //
-    // Iniciamos los controles del nuevo chk
+    // si la pulsacion es en chk, ponemos el nuevo chk como pulsado
     //
-    if(chk[0].is_cheked == True){
-            initControlsPolinomicos();
+    i = 0;
+    x = ev.xbutton.x;
+    y = ev.xbutton.y;
+
+    while(i < MAX_CHK){
+
+        x0 = chk[i].x;
+        x1 = chk[i].x + chk[i].ancho;
+        y0 = chk[i].y;
+        y1 = chk[i].y + chk[i].alto;
+
+        if(x0 < x && x1 > x && y0 < y && y1 > y){
+            setChkCheked(i);
+            i = MAX_ET;
+        }
+        i++;
     }
 
+    //
+    // Si la pulsacion es en un et, le damos el foco
+    //
+    i = 0;
+    while(i < MAX_ET){
+
+        x0 = et[i].x;
+        x1 = et[i].x + et[i].ancho;
+        y0 = et[i].y;
+        y1 = et[i].y + et[i].alto;
+
+        if(x0 < x && x1 > x && y0 < y && y1 > y && et[i].is_enabled == True){
+            setFocusEt(i);
+            i = MAX_ET;
+        }
+
+        i++;
+    }
+
+    //
+    // Redibujamos
+    //
     pintaEdit();
+}
+
+void editKeyPress(XEvent ev){
+    int     i;
+    char    key;
+    char    msg[1024];
+    int     et_focused;
+    int     len_msg;
+
+    //
+    // Obtenemos el  caracter
+    //
+    key = XkbKeycodeToKeysym(dpy, ev.xkey.keycode, 0, ev.xkey.state & ShiftMask ? 1 : 0);
+
+    //
+    // Buscamos si hay algun et con el foco
+    //
+    et_focused  = -1;
+    i           = 0;
+    while(i < MAX_ET){
+        if(et[i].is_focused == True){
+            et_focused = i;
+            i = MAX_ET;
+        }
+        i++;
+    }
+
+    //
+    // Si es la tecla ESC y no hay msgBox Salimos
+    //
+    if(ev.xkey.keycode == ESC && dat_msg_box.is_enabled == False){
+        salir();
+    }
+    //
+    // Si es ESC y Hay MsgBox lo Cerramos
+    //
+    else if(ev.xkey.keycode == ESC && dat_msg_box.is_enabled == True){
+        hideMsgBox();
+    }
+
+    //
+    // Si es BACK borramos la ultima letra
+    //
+    if(ev.xkey.keycode == BACK && et_focused >= 0){
+        len_msg = strlen(et[et_focused].msg);
+        if(len_msg > 0){
+            strcpy(msg, et[et_focused].msg);
+            msg[len_msg -1] = '\0';
+            strcpy(et[et_focused].msg, msg);
+        }
+    }
+
+    //
+    // Si es la tecla ENTER o RUN pasamos el foco al siguiente et y avisamos al metodo KeyReturnPressed.
+    //
+    else if(ev.xkey.keycode == ENTER || ev.xkey.keycode == RUN){
+
+        etKeyReturnPressed(et[et_focused]);
+    }
+
+    //
+    // Si es mayuscula
+    //
+    else if(ev.xkey.keycode == KEY_MAY){
+
+    }
+    //
+    // Cualquier otra pulsacion
+    //
+    else{
+        //
+        // Interpretamos el teclado numerico
+        //
+        if(ev.xkey.keycode == KEY_0){key = '0';}
+        if(ev.xkey.keycode == KEY_1){key = '1';}
+        if(ev.xkey.keycode == KEY_2){key = '2';}
+        if(ev.xkey.keycode == KEY_3){key = '3';}
+        if(ev.xkey.keycode == KEY_4){key = '4';}
+        if(ev.xkey.keycode == KEY_5){key = '5';}
+        if(ev.xkey.keycode == KEY_6){key = '6';}
+        if(ev.xkey.keycode == KEY_7){key = '7';}
+        if(ev.xkey.keycode == KEY_8){key = '8';}
+        if(ev.xkey.keycode == KEY_9){key = '9';}
+        if(ev.xkey.keycode == KEY_MUL){key = '*';}
+        if(ev.xkey.keycode == KEY_DIV){key = '/';}
+        if(ev.xkey.keycode == KEY_SUM){key = '+';}
+        if(ev.xkey.keycode == KEY_RES){key = '-';}
+        if(ev.xkey.keycode == KEY_PTO){key = '.';}
+
+        //
+        // Añadimos el caracter al msg
+        //
+        if(strlen(et[et_focused].msg) < 1023 && et_focused >= 0){
+            et[et_focused].msg[strlen(et[et_focused].msg)]      = key;
+            et[et_focused].msg[strlen(et[et_focused].msg) +1]   = '\0';
+        }
+    }
+
+    //
+    // Refrescamos la pantalla
+    //
+    pintaEdit();
+
+}
+
+void etKeyReturnPressed(Datos etKeyPress){
+
+
+
+    //
+    // KeyPress del et[0]
+    //
+    if(strlen(et[etKeyPress.id].msg) == 0 && etKeyPress.id == et[0].id){
+        setFocusEt(-1);
+        showMsgBox(dat_edit, etKeyPress, "Debes de indicar el grado de la funcion...");
+    }
+    else if(isNumerico(et[etKeyPress.id].msg) == False && etKeyPress.id == et[0].id){
+        setFocusEt(-1);
+        showMsgBox(dat_edit, etKeyPress, "Debes de indicar un Numero...");
+    }
+    else if(atoi(et[etKeyPress.id].msg) > 4 && etKeyPress.id == et[0].id){
+        setFocusEt(-1);
+        showMsgBox(dat_edit, etKeyPress, "El grado no puede ser mayor de 4...");
+    }
+    else if(etKeyPress.id == et[0].id){
+
+        //
+        //Activamos todos los controles
+        //
+        et[1].is_enabled = True;
+        et[2].is_enabled = True;
+        et[3].is_enabled = True;
+        et[4].is_enabled = True;
+
+        //
+        // Borramos todos los ceficientes
+        //
+        et[1].msg[0] = '\0';
+        et[2].msg[0] = '\0';
+        et[3].msg[0] = '\0';
+        et[4].msg[0] = '\0';
+
+        //
+        // valor 0
+        //
+        if(atoi(et[0].msg) == 0){
+            sprintf(et[1].msg,"0");
+            sprintf(et[2].msg,"0");
+            sprintf(et[3].msg,"0");
+            sprintf(et[4].msg,"0");
+
+            et[1].is_enabled = False;
+            et[2].is_enabled = False;
+            et[3].is_enabled = False;
+            et[4].is_enabled = False;
+
+            setFocusEt(5);
+        }
+
+        //
+        // valor 1
+        //
+        if(atoi(et[0].msg) == 1){
+            sprintf(et[1].msg,"0");
+            sprintf(et[2].msg,"0");
+            sprintf(et[3].msg,"0");
+
+            et[1].is_enabled = False;
+            et[2].is_enabled = False;
+            et[3].is_enabled = False;
+
+            setFocusEt(4);
+        }
+
+        //
+        // valor 2
+        //
+        if(atoi(et[0].msg) == 1){
+            sprintf(et[1].msg,"0");
+            sprintf(et[2].msg,"0");
+
+            et[1].is_enabled = False;
+            et[2].is_enabled = False;
+
+            setFocusEt(3);
+        }
+
+        //
+        // valor 3
+        //
+        if(atoi(et[0].msg) == 3){
+            sprintf(et[1].msg,"0");
+
+            et[1].is_enabled = False;
+
+            setFocusEt(2);
+        }
+
+        //
+        // valor 4
+        //
+        if(atoi(et[0].msg) == 4){
+            setFocusEt(1);
+        }
+    }
+
+    //
+    // KeyPress del et[1]
+    //
+    if(etKeyPress.id == et[1].id){
+        setFocusEt(2);
+    }
+
+    //
+    // KeyPress del et[2]
+    //
+    if(etKeyPress.id == et[2].id){
+        setFocusEt(3);
+    }
+
+    //
+    // KeyPress del et[3]
+    //
+    if(etKeyPress.id == et[3].id){
+        setFocusEt(4);
+    }
+
+    //
+    // KeyPress del et[4]
+    //
+    if(etKeyPress.id == et[4].id){
+        setFocusEt(5);
+    }
+
+    //
+    // KeyPress del et[5]
+    //
+    if(etKeyPress.id == et[5].id){
+        setFocusEt(6);
+    }
+
+    //
+    // KeyPress del et[6]
+    //
+    if(etKeyPress.id == et[6].id){
+        setFocusEt(7);
+    }
+
+    //
+    // KeyPress del et[7]
+    //
+    if(etKeyPress.id == et[7].id){
+        setFocusEt(8);
+    }
+
+    //
+    // KeyPress del et[8]
+    //
+    if(etKeyPress.id == et[8].id){
+        setFocusEt(-1);
+    }
 }

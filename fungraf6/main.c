@@ -75,8 +75,13 @@ void gesExpose(XEvent ev){
     if(ev.xfocus.window == win_scr){
         pintaUi();
     }
+
     if(ev.xfocus.window == w_edit){
         pintaEdit();
+    }
+
+    if(ev.xfocus.window == win_msg_box){
+        pintaMsgBox();
     }
 }
 
@@ -88,35 +93,64 @@ void gesConfigureNotify(XEvent ev){
 }
 
 void gesButtonPress(XEvent ev){
-    int i;
 
-    if(ev.xfocus.window == win_menu){
+    if(ev.xfocus.window == win_menu && dat_msg_box.is_enabled == False){
         menuClick(ev);
     }
 
-    i = 0;
-    while(i < 4){
-        if(ev.xfocus.window == chk[i].id){
-            editClick(ev);
-        }
-        i++;
+    if(ev.xfocus.window == w_edit && dat_msg_box.is_enabled == False){
+        editClick(ev);
     }
 
+    if(ev.xfocus.window == win_msg_box){
+        msgBoxClick(ev);
+    }
 }
 
 void gesKeyPress(XEvent ev){
 
-    if(ev.xfocus.window == win_menu && ev.xkey.keycode == ESC){
+    //
+    // win_mwnu KeyPress y no hay msgBox
+    //
+    if(ev.xfocus.window == win_menu && ev.xkey.keycode == ESC && dat_msg_box.is_enabled == False){
         salir();
     }
 
-    if(ev.xfocus.window == win && ev.xkey.keycode == ESC){
+    //
+    // Win_menu keyPress y no hay msg y no es ESC, editKeyPress
+    //
+    if(ev.xfocus.window == win_menu && ev.xkey.keycode != ESC && dat_msg_box.is_enabled == False){
+        editKeyPress(ev);
+    }
+
+    //
+    // win_mwnu KeyPress y hay MsgBox, debemos cerrar este
+    //
+    if(ev.xfocus.window == win_menu && ev.xkey.keycode == ESC && dat_msg_box.is_enabled == True){
+        hideMsgBox();
+    }
+
+    //
+    // Win KeyPress
+    //
+    if(ev.xfocus.window == win && ev.xkey.keycode == ESC && dat_msg_box.is_enabled == False){
         salir();
     }
 
-    if(ev.xfocus.window == w_edit && ev.xkey.keycode == ESC){
-        salir();
+    //
+    // Win MsgBox
+    //
+    if(ev.xfocus.window == win_msg_box && ev.xkey.keycode == ESC){
+        hideMsgBox();
     }
+
+    //
+    // w_edit KeyPress
+    //
+    if(ev.xfocus.window == w_edit){
+        editKeyPress(ev);
+    }
+
 }
 
 void colorCursor(int s){

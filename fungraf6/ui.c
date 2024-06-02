@@ -4,6 +4,7 @@
 #include <time.h>
 #include <signal.h>
 #include <unistd.h>
+#include <ctype.h>
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -38,7 +39,7 @@ void initUi(){
     negro           = BlackPixel(dpy, scr);
     ancho_scr       = DisplayWidth(dpy, scr);
     alto_scr        = DisplayHeight(dpy, scr);
-
+    win_msg_box     = -1;
 
 
     //
@@ -369,6 +370,21 @@ void menuClick(XEvent ev){
     pintaUi();
 }
 
+void msgBoxClick(XEvent ev){
+    int x, y, x0, y0, y1, x1;
+
+    x0  = dat_msg_box.ancho - 200;
+    y0  = 125;
+    x1  = x0 + 150;
+    y1  = y0 + 50;
+    x   = ev.xbutton.x;
+    y   = ev.xbutton.y;
+
+    if(x0 < x && x < x1 && y0 < y && y < y1){
+        hideMsgBox();
+    }
+}
+
 XImage *loadImagen(Display *display, Window w, char *ruta){
     Pixmap      pix;
     Imlib_Image imlib_img;
@@ -500,6 +516,19 @@ void setTexto(Window w, GC gc, char *msg, XFontStruct *xfs, unsigned long color,
     XDrawString(dpy, w, gc, x0, y0, msg, tam);
 }
 
+void setMsgVisualEt(Window id, char *p_msg){
+    int i;
+
+    i = 0;
+    while(i< MAX_ET){
+        if(et[i].id == id){
+            strcpy( et[i].msg_visual, p_msg);
+            i =MAX_ET;
+        }
+        i++;
+    }
+}
+
 void setEditText(Datos et){
     int x, y;
     int     i, j;
@@ -507,7 +536,7 @@ void setEditText(Datos et){
     char    msg_visual[1024];
 
     //
-    // Obtenemos los max caracteres a mostrar, y le restamos 2
+    // Obtenemos los max caracteres a mostrar, y le restamos 1
     //
     len_msg     = strlen(et.msg);
     ancho_msg   = XTextWidth(et.xfs, et.msg, len_msg);
@@ -517,15 +546,15 @@ void setEditText(Datos et){
         max_caracters   = (int) (et.ancho / ancho_caracter);
     }
     else{
-        ancho_caracter  = 0;
+        ancho_caracter  = 9;
         max_caracters   = 0;
     }
-    max_caracters -= 2;
+    max_caracters --;
     if(max_caracters < 0) max_caracters = 0;
     if(max_caracters > 1022) max_caracters = 1022;
 
     //
-    // Ahora si el texto es muy grande, mostramos solo el final
+    // Ahora si el texto es muy grande, mostramos solo el final, msg_visual
     //
     if(len_msg > 0 && len_msg >= max_caracters){
         i = max_caracters -1;
@@ -541,11 +570,29 @@ void setEditText(Datos et){
         strcpy(msg_visual, et.msg);
     }
 
-    setClick(dpy, et.id, et.gc, 2, 2, et.ancho - 4, et.alto - 4);
+    //
+    // actualizamos el campo msg_visual de et
+    //
+    setMsgVisualEt(et.id, msg_visual);
 
-    x = 9;
-    y = (int)(et.alto / 2) + 7;
-    setTexto(et.id, et.gc, msg_visual, et.xfs, et.color, x, y, et.ancho, et.alto);
+    //
+    // Borramos todo lo anterior
+    //
+    XSetForeground(dpy, et.gc, et.back_color);
+    XFillRectangle(dpy, et.padre, et.gc, et.x, et.y, et.ancho, et.alto);
+
+    //
+    // Colocamos el efecto caja
+    //
+    setClick(dpy, et.padre, et.gc, et.x + 2, et.y + 2, et.ancho - 4, et.alto - 4);
+
+    //
+    // Mostramos msg_visual
+    //
+    x = et.x + 9;
+    y = et.y + (int)(et.alto / 2) + 7;
+
+    setTexto(et.padre, et.gc, msg_visual, et.xfs, et.color, x, y, et.ancho, et.alto);
 
 }
 
@@ -582,12 +629,152 @@ void setFechaHora(){
 
 }
 
+int isNumerico(char *pMsg){
+    int     isNumerico = False;
+    int     i;
+    char    msg[1024];
+
+    strcpy(msg, pMsg);
+
+    i = 0;
+    while(i < strlen(msg)){
+            int ii = isdigit(msg[i]);
+
+        if(isdigit(msg[i])){
+            isNumerico = True;
+        }
+        else{
+            isNumerico = False;
+            i = strlen(msg);
+        }
+        i++;
+    }
+
+    return isNumerico;
+}
+
+void showMsgBox(Datos win_padre, Datos foco, char *pMsg){
+    int         x, y, ancho, alto;
+    int         x0, y0;
+    int         len_msg;
+    XFontStruct *xfs;
+
+    //
+    // Copiamos pMsg en msg_box
+    //
+    strcpy(dat_msg_box.msg, pMsg);
+
+    xfs = XLoadQueryFont(dpy, FONT_N_B);
+    x0  = (int)(win_padre.ancho / 2);
+    y0  = (int)(win_padre.alto / 2);
+
+    //
+    // Calculamos los valores
+    //
+    len_msg = strlen(dat_msg_box.msg);
+    ancho   = XTextWidth(xfs, dat_msg_box.msg, len_msg) * 2;
+    alto    = 200;
+    x       = (x0 - (ancho / 2));
+    y       = y0 - 100;
+
+    //
+    // Creamosla nueva ventana solo si no existe
+    //
+    win_msg_box = XCreateSimpleWindow(dpy,
+                                    win_padre.id,
+                                    x,
+                                    y,
+                                    ancho,
+                                    alto,
+                                    5,
+                                    negro,
+                                    gris);
+
+    dat_msg_box.id          = win_padre.id;
+    dat_msg_box.ancho       = ancho;
+    dat_msg_box.alto        = alto;
+    dat_msg_box.padre       = foco.id;
+    dat_msg_box.is_enabled  = True;
+
+
+    XSelectInput(dpy, win_msg_box, ExposureMask | ButtonPressMask | KeyPressMask);
+
+    //
+    // Creamos el gc
+    //
+    gc_msg_box = XCreateGC(dpy, win_msg_box, 0, 0);
+
+    //
+    // Establecemos el valor minimo de win_msg_box
+    //
+    XSizeHints *tam_minimo = XAllocSizeHints();
+
+    tam_minimo->flags        = PMinSize;
+    tam_minimo->min_width    = ancho;
+    tam_minimo->min_height   = alto;
+    XSetWMNormalHints(dpy, win_msg_box, tam_minimo);
+
+    XFree(tam_minimo);
+
+    //
+    // Mostramos el mensaje
+    //
+    pintaMsgBox();
+
+    //
+    // Mapeamos la pantalla
+    //
+    XMapRaised(dpy, win_msg_box);
+    XFlush(dpy);
+
+}
+
+void pintaMsgBox(){
+    int         len_msg;
+    int         ancho;
+    XFontStruct *xfs;
+
+    xfs         = XLoadQueryFont(dpy, FONT_N_B);
+    len_msg     = strlen(dat_msg_box.msg);
+    ancho       = XTextWidth(xfs, dat_msg_box.msg, len_msg) * 2;
+
+    setTexto(win_msg_box, gc_msg_box, dat_msg_box.msg, xfs, negro, 50, 75, (int)(ancho / 2) + 50, 50);
+
+    setUnClick(dpy, win_msg_box, gc_msg_box, ancho - 200, 125, 150, 50);
+    setTexto(win_msg_box, gc_msg_box, "Cerrar", xfs, negro, ancho - 150, 155, 100, 50);
+
+}
+
+void hideMsgBox(){
+
+
+    XFreeGC(dpy, gc_msg_box);
+    XUnmapWindow(dpy, win_msg_box);
+    XDestroyWindow(dpy, win_msg_box);
+
+    //win_msg_box = -1;
+    dat_msg_box.is_enabled = False;
+
+    XFlush(dpy);
+
+    //
+    // Segun el padre pintamos la pantalla
+    //
+    if(dat_msg_box.id == w_edit){
+        pintaEdit();
+    }
+
+    setFocusEt(dat_msg_box.padre);
+}
+
 void pintaCursor(){
     int             i;
-    int             x, y0, y1;
+    int             x, y, h;
     int             hay_ets;
     int             et_focused  = -1;
-    int             ancho_et;
+    int             ancho_msg;
+    int             len_msg;
+    int             ancho_caracter;
     unsigned long   color;
 
     //
@@ -596,7 +783,6 @@ void pintaCursor(){
     i           = 0;
     hay_ets     = False;
     while(i < MAX_ET){
-            int f = et[0].is_enabled;
         if(et[i].is_enabled == True){
             hay_ets = True;
             i = MAX_ET;
@@ -637,24 +823,24 @@ void pintaCursor(){
         //
         // Ahora el ancho de msg
         //
-        if(strlen(et[et_focused].msg) == 0){
-            ancho_et = 0;
+        len_msg         = strlen(et[et_focused].msg_visual);
+        ancho_msg       = XTextWidth(et[et_focused].xfs, et[et_focused].msg_visual, len_msg);
+        if(len_msg > 0){
+            ancho_caracter  = (int)(ancho_msg / len_msg);
         }
         else{
-            ancho_et = XTextWidth(et[et_focused].xfs, et[et_focused].msg, strlen(et[et_focused].msg));
+            ancho_caracter = 9;
         }
-
-        x   = ancho_et + 12;
-        y0  = 8;
-        y1  = et[et_focused].alto -5;
 
         XSetLineAttributes( dpy, et[et_focused].gc, 3, LineSolid, CapRound, JoinMiter);
         XSetForeground(dpy, et[et_focused].gc, color);
-        XDrawLine(dpy, et[et_focused].id, et[et_focused].gc, x, y0, x, y1);
+
+        x   = et[et_focused].x + (ancho_msg) + (int) (ancho_caracter);
+        y   = et[et_focused].y + (int) (et[et_focused].alto / 2);
+        h   = (int) (et[et_focused].alto / 2 ) - 5;
+
+        XDrawLine(dpy, et[et_focused].padre, et[et_focused].gc, x, y + h, x, y - h + 3);
     }
-
-
-
 }
 
 unsigned long colorPorNombre( Display *dis, char *nombre ){
