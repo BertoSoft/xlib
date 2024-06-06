@@ -17,15 +17,18 @@ void initEdit(){
     // Creamos la ventana
     //
     w_edit = XCreateSimpleWindow(dpy,
-                            win,
-                            0,
-                            0,
-                            dat_win.ancho,
-                            dat_win.alto,
-                            0,
-                            azul,
-                            gris_claro);
+                                win,
+                                0,
+                                0,
+                                dat_win.ancho,
+                                dat_win.alto,
+                                0,
+                                azul,
+                                gris_claro);
 
+    //
+    // Grabamos sus datos
+    //
     dat_edit.id          = w_edit;
     dat_edit.x           = 0;
     dat_edit.y           = 0;
@@ -43,7 +46,8 @@ void initEdit(){
     //
     // Creamos el gc
     //
-    gc_edit = XCreateGC(dpy, w_edit, 0, 0);
+    gc_edit     = XCreateGC(dpy, w_edit, 0, 0);
+    dat_edit.gc = gc_edit;
 
     //
     // Mapeamos la pantalla
@@ -281,6 +285,11 @@ void setEtEnabled(int activo){
 }
 
 void pintaEdit(){
+
+    //
+    // Redimensionamos la ventana, por si cambio de dimensiones
+    //
+    XMoveResizeWindow(dpy, w_edit, dat_win.x, dat_win.y, dat_win.ancho, dat_win.alto);
 
     XClearWindow(dpy, w_edit);
     pintaTipoFuncion();
@@ -538,6 +547,155 @@ void pintaDatosPolinomicas(){
     setTexto(w_edit, gc_edit, msg, xfs, dat_edit.color, x + 50, y + 60, 400, 25);
     setEditText(et[8]);
 
+    //
+    // Funcion
+    //
+    pintaFuncionPolinomica(15, 450, dat_win.ancho - 65, 200);
+
+    //
+    // Limites
+    //
+    pintaLimites(15, 700, (int)(2 * (dat_win.ancho / 3)), 150);
+
+    //
+    // Epsilon
+    //
+    pintaEpsilon((int)(2 * (dat_win.ancho / 3)) + 50 , 700, (int)(2 * (dat_win.ancho / 3)) -50, 150);
+
+}
+
+void pintaFuncionPolinomica(int x, int y , int ancho, int alto){
+    XFontStruct *xfs;
+    char        msg[1024], msg1[1024], msg2[1024];
+    int         g1, g2, g3, g4, cte;
+    char        *ptr;
+    int         x_t, y_t, ancho_t, alto_t, ancho_c, len;
+
+    //
+    //Primero hago un borrado del cuadro
+    //
+    XSetForeground(dpy, gc_edit, dat_edit.back_color);
+    XFillRectangle(dpy, w_edit, gc_edit, x + 2, y +2, ancho -4, alto -4);
+
+    //
+    //Dibujamos los cuadros
+    //
+    XSetLineAttributes( dpy, gc_edit, 1, LineSolid, CapRound, JoinMiter);
+    XSetForeground(dpy, gc_edit, dat_edit.color);
+    XDrawRectangle(dpy, w_edit, gc_edit, x -2, y -2, ancho, alto +4);
+    XDrawRectangle(dpy, w_edit, gc_edit, x, y, ancho -4, alto);
+
+    //
+    // Renovamos los datos del polinomio
+    //
+    cte = g4 = g3 = g2 = g1 = 0;
+
+    sscanf(et[1].msg, "%d", &g4);
+    sscanf(et[2].msg, "%d", &g3);
+    sscanf(et[3].msg, "%d", &g2);
+    sscanf(et[4].msg, "%d", &g1);
+    sscanf(et[5].msg, "%d", &cte);
+
+    polinomio[0] = cte;
+    polinomio[1] = g1;
+    polinomio[2] = g2;
+    polinomio[3] = g3;
+    polinomio[4] = g4;
+
+
+    //
+    // empezamos con el grado 4
+    //
+    if(g4 == 0){
+            sprintf( msg1, "f(x) =");}
+    if(g4 < 0 && g4 != -1){sprintf(msg1, "f(x) = - %d*X(exp)4", abs(g4));}
+    if(g4 > 0 && g4 != 1){sprintf(msg1, "f(x) = %d*X(exp)4", g4);}
+    if(g4 == 1){sprintf(msg1, "f(x) = X(exp)4");}
+    if(g4 == -1){sprintf(msg1, "f(x) = - X(exp)4");}
+
+    //
+    // Grado 3
+    //
+    if(g3 == 0){sprintf(msg2, " ");}
+    if(g3 < 0 && g3 != -1){sprintf(msg2,  " - %d*X(exp)3", abs(g3));}
+    if(g3 > 0 && g3 !=1){sprintf(msg2, " +%d*X(exp)3", g3);}
+    if(g3 == 1){sprintf(msg2, " + X(exp)3");}
+    if(g3 == -1){sprintf(msg2, " - X(exp)3");}
+
+    ptr = strcat(msg1, msg2);   // Unimos msg1 y msg2
+    strcpy(msg, ptr);           // pasamos lo que hay en ptr a msg
+    strcpy(msg1, msg);          // Copiamos msg en msg1
+
+    //
+    // Grado 2
+    //
+    if(g2 == 0){sprintf(msg2, " ");}
+    if(g2 < 0 && g2 != -1){sprintf(msg2,  " - %d*X(exp)2", abs(g2));}
+    if(g2 > 0 && g2 !=1){sprintf(msg2, " + %d*X(exp)2", g2);}
+    if(g2 == 1){sprintf(msg2, " + X(exp)2");}
+    if(g2 == -1){sprintf(msg2, " - X(exp)2");}
+
+    ptr = strcat(msg1, msg2);
+    strcpy(msg, ptr);
+    strcpy(msg1, msg);
+
+    //
+    // Grado 1
+    //
+    if(g1 == 0){sprintf(msg2, " ");}
+    if(g1 < 0 && g1 != -1){sprintf(msg2,  " - %d*X", abs(g1));}
+    if(g1 > 0 && g1 !=1){sprintf(msg2, " + %d*X", g1);}
+    if(g1 == 1){sprintf(msg2, " + X");}
+    if(g1 == -1){sprintf(msg2, " - X");}
+
+    ptr = strcat(msg1, msg2);
+    strcpy(msg, ptr);
+    strcpy(msg1, msg);
+
+    //
+    // Cte
+    //
+    if(cte == 0){sprintf(msg2, " ");}
+    if(cte > 0){sprintf(msg2, " + %d", cte);}
+    if(cte < 0){sprintf(msg2, " - %d", abs(cte));}
+
+    ptr = strcat(msg1, msg2);
+    strcpy(msg, ptr);
+
+
+    //
+    // Si la longitud de ecuacion es mayor que cero, Presento la ecuacion centrada
+    //
+    if(strlen(msg) > 0){
+
+        xfs = XLoadQueryFont(dpy, FONT_G);
+
+        len     = strlen(msg);
+        ancho_t = XTextWidth(xfs, msg, strlen(msg));
+        ancho_c = (int) (ancho_t / len);
+        ancho_t += (int) (2 * ancho_c);
+        alto_t  = 50;
+        x_t     = (int) (ancho / 2) - (ancho_t / 2);
+        y_t     = (int) y + (alto / 2);
+
+        setTexto(w_edit, gc_edit, msg, xfs, azul, x_t, y_t, ancho_t, alto_t);
+    }
+
+
+    XFlush(dpy);
+
+}
+
+void pintaLimites(int x, int y, int ancho, int alto){
+    char    msg[1024];
+    int     l0, l1;
+
+    //
+    //Leemos los limites
+    //
+}
+
+void pintaEpsilon(int x, int y, int ancho, int alto){
 
 }
 
@@ -669,9 +827,9 @@ void editKeyPress(XEvent ev){
     }
 
     //
-    // Si es la tecla ENTER o RUN pasamos el foco al siguiente et y avisamos al metodo KeyReturnPressed.
+    // Si es la tecla ENTER o RUN avisamos al metodo KeyReturnPressed.
     //
-    else if(ev.xkey.keycode == ENTER || ev.xkey.keycode == RUN){
+    else if( (ev.xkey.keycode == ENTER || ev.xkey.keycode == RUN) && et_focused >= 0){
 
         etKeyReturnPressed(et[et_focused]);
     }
@@ -721,26 +879,25 @@ void editKeyPress(XEvent ev){
 
 }
 
-void etKeyReturnPressed(Datos etKeyPress){
-
+void etKeyReturnPressed(Datos etKeyReturnPressed){
 
 
     //
     // KeyPress del et[0]
     //
-    if(strlen(et[etKeyPress.id].msg) == 0 && etKeyPress.id == et[0].id){
+    if(strlen(et[etKeyReturnPressed.id].msg) == 0 && etKeyReturnPressed.id == et[0].id){
         setFocusEt(-1);
-        showMsgBox(dat_edit, etKeyPress, "Debes de indicar el grado de la funcion...");
+        showMsgBox(dat_edit, etKeyReturnPressed, "Debes de indicar el grado de la funcion...");
     }
-    else if(isNumerico(et[etKeyPress.id].msg) == False && etKeyPress.id == et[0].id){
+    else if(isNumerico(et[etKeyReturnPressed.id].msg) == False && etKeyReturnPressed.id == et[0].id){
         setFocusEt(-1);
-        showMsgBox(dat_edit, etKeyPress, "Debes de indicar un Numero...");
+        showMsgBox(dat_edit, etKeyReturnPressed, "Debes de indicar un Numero...");
     }
-    else if(atoi(et[etKeyPress.id].msg) > 4 && etKeyPress.id == et[0].id){
+    else if(atoi(et[etKeyReturnPressed.id].msg) > 4 && etKeyReturnPressed.id == et[0].id){
         setFocusEt(-1);
-        showMsgBox(dat_edit, etKeyPress, "El grado no puede ser mayor de 4...");
+        showMsgBox(dat_edit, etKeyReturnPressed, "El grado no puede ser mayor de 4...");
     }
-    else if(etKeyPress.id == et[0].id){
+    else if(etKeyReturnPressed.id == et[0].id){
 
         //
         //Activamos todos los controles
@@ -749,6 +906,7 @@ void etKeyReturnPressed(Datos etKeyPress){
         et[2].is_enabled = True;
         et[3].is_enabled = True;
         et[4].is_enabled = True;
+        et[5].is_enabled = True;
 
         //
         // Borramos todos los ceficientes
@@ -757,6 +915,7 @@ void etKeyReturnPressed(Datos etKeyPress){
         et[2].msg[0] = '\0';
         et[3].msg[0] = '\0';
         et[4].msg[0] = '\0';
+        et[5].msg[0] = '\0';
 
         //
         // valor 0
@@ -796,11 +955,13 @@ void etKeyReturnPressed(Datos etKeyPress){
         if(atoi(et[0].msg) == 1){
             sprintf(et[1].msg,"0");
             sprintf(et[2].msg,"0");
+            sprintf(et[3].msg,"0");
 
             et[1].is_enabled = False;
             et[2].is_enabled = False;
+            et[3].is_enabled = False;
 
-            setFocusEt(3);
+            setFocusEt(4);
         }
 
         //
@@ -825,56 +986,57 @@ void etKeyReturnPressed(Datos etKeyPress){
     //
     // KeyPress del et[1]
     //
-    if(etKeyPress.id == et[1].id){
+    if(etKeyReturnPressed.id == et[1].id){
         setFocusEt(2);
     }
 
     //
     // KeyPress del et[2]
     //
-    if(etKeyPress.id == et[2].id){
+    if(etKeyReturnPressed.id == et[2].id){
         setFocusEt(3);
     }
 
     //
     // KeyPress del et[3]
     //
-    if(etKeyPress.id == et[3].id){
+    if(etKeyReturnPressed.id == et[3].id){
         setFocusEt(4);
     }
 
     //
     // KeyPress del et[4]
     //
-    if(etKeyPress.id == et[4].id){
+    if(etKeyReturnPressed.id == et[4].id){
         setFocusEt(5);
     }
 
     //
     // KeyPress del et[5]
     //
-    if(etKeyPress.id == et[5].id){
+    if(etKeyReturnPressed.id == et[5].id){
         setFocusEt(6);
     }
 
     //
     // KeyPress del et[6]
     //
-    if(etKeyPress.id == et[6].id){
+    if(etKeyReturnPressed.id == et[6].id){
         setFocusEt(7);
     }
 
     //
     // KeyPress del et[7]
     //
-    if(etKeyPress.id == et[7].id){
+    if(etKeyReturnPressed.id == et[7].id){
         setFocusEt(8);
     }
 
     //
     // KeyPress del et[8]
     //
-    if(etKeyPress.id == et[8].id){
+    if(etKeyReturnPressed.id == et[8].id){
         setFocusEt(-1);
     }
+
 }

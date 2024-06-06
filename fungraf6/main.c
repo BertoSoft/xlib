@@ -10,6 +10,7 @@
 
 #include "ui.h"
 #include "edit.h"
+#include "grafica.h"
 
 void gesExpose(XEvent ev);
 void gesConfigureNotify(XEvent ev);
@@ -76,17 +77,26 @@ void gesExpose(XEvent ev){
         pintaUi();
     }
 
-    if(ev.xfocus.window == w_edit){
+    if(ev.xfocus.window == w_edit && dat_msg_box.is_enabled == False){
         pintaEdit();
     }
 
-    if(ev.xfocus.window == win_msg_box){
+    if(ev.xfocus.window == w_edit && dat_msg_box.is_enabled == True){
+        pintaEdit();
         pintaMsgBox();
     }
+
+    if(ev.xfocus.window == w_grafica && dat_msg_box.is_enabled == False){
+        pintaGrafica();
+    }
+
 }
 
 void gesConfigureNotify(XEvent ev){
 
+    //
+    // Cambiamos las medidas de las venatnas
+    //
     if(ev.xfocus.window == win_scr){
         resizeWin(ev);
     }
@@ -102,15 +112,16 @@ void gesButtonPress(XEvent ev){
         editClick(ev);
     }
 
-    if(ev.xfocus.window == win_msg_box){
+    if(ev.xfocus.window == dat_msg_box.id && dat_msg_box.is_enabled == True){
         msgBoxClick(ev);
     }
+
 }
 
 void gesKeyPress(XEvent ev){
 
     //
-    // win_mwnu KeyPress y no hay msgBox
+    // win_mwnu KeyPress ESC y no hay msgBox
     //
     if(ev.xfocus.window == win_menu && ev.xkey.keycode == ESC && dat_msg_box.is_enabled == False){
         salir();
@@ -124,9 +135,16 @@ void gesKeyPress(XEvent ev){
     }
 
     //
-    // win_mwnu KeyPress y hay MsgBox, debemos cerrar este
+    // win_mwnu KeyPress ESC y hay MsgBox, debemos cerrar este
     //
     if(ev.xfocus.window == win_menu && ev.xkey.keycode == ESC && dat_msg_box.is_enabled == True){
+        hideMsgBox();
+    }
+
+    //
+    //msgBox KeyPress ESC
+    //
+    if(ev.xfocus.window == dat_msg_box.id && dat_msg_box.is_enabled == True && ev.xkey.keycode == ESC){
         hideMsgBox();
     }
 
@@ -135,13 +153,6 @@ void gesKeyPress(XEvent ev){
     //
     if(ev.xfocus.window == win && ev.xkey.keycode == ESC && dat_msg_box.is_enabled == False){
         salir();
-    }
-
-    //
-    // Win MsgBox
-    //
-    if(ev.xfocus.window == win_msg_box && ev.xkey.keycode == ESC){
-        hideMsgBox();
     }
 
     //

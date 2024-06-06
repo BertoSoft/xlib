@@ -8,6 +8,7 @@ GC              gc_edit;
 Datos           dat_edit;
 int             chk_opt;
 int             chk_old;
+int             polinomio[5];
 
 void initEdit();
 void initChks();
@@ -21,6 +22,9 @@ void pintaEdit();
 void pintaTipoFuncion();
 void pintaDatosFuncion();
 void pintaDatosPolinomicas();
+void pintaFuncionPolinomica(int x, int y, int ancho, int alto);
+void pintaLimites(int x, int y, int ancho, int alto);
+void pintaEpsilon(int x, int y, int ancho, int alto);
 void pintaDatosExponenciales();
 void pintaDatosLogaritmicos();
 void pintaDatosTrigonometricos();

@@ -2,112 +2,119 @@
 <CodeBlocks_layout_file>
 	<FileVersion major="1" minor="0" />
 	<ActiveTarget name="Debug" />
-	<File name="grafica.h" open="0" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="grafica.c" open="1" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="190" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="edit.c" open="1" top="1" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="18893" topLine="140" />
-		</Cursor>
-		<Folding>
-			<Collapse line="13" />
-			<Collapse line="54" />
-			<Collapse line="101" />
-			<Collapse line="221" />
-			<Collapse line="240" />
-			<Collapse line="248" />
-			<Collapse line="263" />
-			<Collapse line="282" />
-			<Collapse line="289" />
-			<Collapse line="344" />
-			<Collapse line="349" />
-			<Collapse line="372" />
-			<Collapse line="395" />
-			<Collapse line="418" />
-			<Collapse line="442" />
-			<Collapse line="543" />
-			<Collapse line="547" />
-			<Collapse line="551" />
-			<Collapse line="555" />
-			<Collapse line="570" />
-			<Collapse line="620" />
-			<Collapse line="763" />
-			<Collapse line="780" />
-			<Collapse line="795" />
-			<Collapse line="808" />
-			<Collapse line="819" />
-		</Folding>
-	</File>
-	<File name="ui.c" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="16757" topLine="34" />
-		</Cursor>
-		<Folding>
-			<Collapse line="19" />
-			<Collapse line="27" />
-			<Collapse line="64" />
-			<Collapse line="86" />
-			<Collapse line="108" />
-			<Collapse line="200" />
-			<Collapse line="224" />
-			<Collapse line="245" />
-			<Collapse line="251" />
-			<Collapse line="307" />
-			<Collapse line="372" />
-			<Collapse line="387" />
-			<Collapse line="447" />
-			<Collapse line="466" />
-			<Collapse line="486" />
-			<Collapse line="518" />
-			<Collapse line="531" />
-			<Collapse line="598" />
-			<Collapse line="631" />
-			<Collapse line="655" />
-			<Collapse line="731" />
-			<Collapse line="747" />
-			<Collapse line="769" />
-			<Collapse line="845" />
-		</Folding>
-	</File>
-	<File name="main.c" open="1" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="2478" topLine="3" />
-		</Cursor>
-		<Folding>
-			<Collapse line="19" />
-			<Collapse line="42" />
-			<Collapse line="72" />
-			<Collapse line="74" />
-			<Collapse line="78" />
-			<Collapse line="82" />
-			<Collapse line="87" />
-			<Collapse line="94" />
-			<Collapse line="104" />
-			<Collapse line="109" />
-			<Collapse line="155" />
-		</Folding>
-	</File>
-	<File name="edit.h" open="0" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="190" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="ui.h" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="3119" topLine="85" />
-		</Cursor>
-	</File>
-	<File name="grafica.c" open="0" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="3710" topLine="99" />
+			<Cursor1 position="1441" topLine="0" />
 		</Cursor>
 		<Folding>
 			<Collapse line="12" />
 			<Collapse line="50" />
 			<Collapse line="57" />
 			<Collapse line="63" />
+			<Collapse line="77" />
+			<Collapse line="187" />
+		</Folding>
+	</File>
+	<File name="edit.h" open="1" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="356" topLine="2" />
+		</Cursor>
+	</File>
+	<File name="ui.c" open="1" top="1" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="6116" topLine="1" />
+		</Cursor>
+		<Folding>
+			<Collapse line="19" />
+			<Collapse line="64" />
+			<Collapse line="86" />
+			<Collapse line="108" />
+			<Collapse line="131" />
+			<Collapse line="200" />
+			<Collapse line="230" />
+			<Collapse line="251" />
+			<Collapse line="257" />
+			<Collapse line="318" />
+			<Collapse line="383" />
+			<Collapse line="398" />
+			<Collapse line="458" />
+			<Collapse line="477" />
+			<Collapse line="497" />
+			<Collapse line="529" />
+			<Collapse line="542" />
+			<Collapse line="609" />
+			<Collapse line="642" />
+			<Collapse line="664" />
+			<Collapse line="728" />
+			<Collapse line="743" />
+			<Collapse line="758" />
+			<Collapse line="834" />
+		</Folding>
+	</File>
+	<File name="grafica.h" open="1" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="125" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="ui.h" open="1" top="0" tabpos="7" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="2286" topLine="66" />
+		</Cursor>
+	</File>
+	<File name="main.c" open="1" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1995" topLine="4" />
+		</Cursor>
+		<Folding>
+			<Collapse line="20" />
+			<Collapse line="43" />
+			<Collapse line="73" />
+			<Collapse line="94" />
+			<Collapse line="104" />
+			<Collapse line="120" />
+			<Collapse line="166" />
+		</Folding>
+	</File>
+	<File name="edit.c" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="5906" topLine="21" />
+		</Cursor>
+		<Folding>
+			<Collapse line="13" />
+			<Collapse line="58" />
+			<Collapse line="105" />
+			<Collapse line="225" />
+			<Collapse line="244" />
+			<Collapse line="252" />
+			<Collapse line="267" />
+			<Collapse line="298" />
+			<Collapse line="353" />
+			<Collapse line="404" />
+			<Collapse line="427" />
+			<Collapse line="451" />
+			<Collapse line="566" />
+			<Collapse line="688" />
+			<Collapse line="697" />
+			<Collapse line="701" />
+			<Collapse line="705" />
+			<Collapse line="709" />
+			<Collapse line="713" />
+			<Collapse line="728" />
+			<Collapse line="778" />
+			<Collapse line="881" />
+			<Collapse line="899" />
+			<Collapse line="922" />
+			<Collapse line="939" />
+			<Collapse line="954" />
+			<Collapse line="969" />
+			<Collapse line="980" />
+			<Collapse line="988" />
+			<Collapse line="995" />
+			<Collapse line="1002" />
+			<Collapse line="1009" />
+			<Collapse line="1016" />
+			<Collapse line="1023" />
+			<Collapse line="1030" />
 		</Folding>
 	</File>
 </CodeBlocks_layout_file>

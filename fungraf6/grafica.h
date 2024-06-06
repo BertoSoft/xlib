@@ -3,9 +3,9 @@
 
 #include "ui.h"
 
-Window          w;
-GC              gc;
-Datos           dat;
+Window          w_grafica;
+GC              gc_grafica;
+Datos           dat_grafica;
 
 void initGrafica();
 void closeGrafica();

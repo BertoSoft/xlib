@@ -200,6 +200,9 @@ void initUi(){
 
 void resizeWin(XEvent ev){
 
+    //
+    // Cambiamos las medidas
+    //
     dat_scr.x       = ev.xconfigure.x;
     dat_scr.y       = ev.xconfigure.y;
     dat_scr.ancho   = ev.xconfigure.width;
@@ -219,6 +222,9 @@ void resizeWin(XEvent ev){
     dat_inf.y      = dat_scr.alto -37;
     dat_inf.ancho  = dat_scr.ancho -4;
     dat_inf.alto   = 44;
+
+    if(opt_menu == 2){pintaEdit();}
+    if(opt_menu == 4){pintaGrafica();}
 
 }
 
@@ -267,6 +273,11 @@ void pintaUi(){
     XMoveResizeWindow(dpy, win, dat_win.x, dat_win.y, dat_win.ancho, dat_win.alto);
     XMoveResizeWindow(dpy, win_menu, dat_menu.x, dat_menu.y, dat_menu.ancho, dat_menu.alto);
     XMoveResizeWindow(dpy, win_inf, dat_inf.x, dat_inf.y, dat_inf.ancho, dat_inf.alto);
+
+    //
+    // Borramos la pantalla
+    //
+    XClearWindow(dpy, win);
 
     //
     // pintamos menu
@@ -373,10 +384,10 @@ void menuClick(XEvent ev){
 void msgBoxClick(XEvent ev){
     int x, y, x0, y0, y1, x1;
 
-    x0  = dat_msg_box.ancho - 200;
-    y0  = 125;
-    x1  = x0 + 150;
-    y1  = y0 + 50;
+    x0  = dat_msg_box.ancho - 175;
+    y0  = dat_msg_box.alto - 75;
+    x1  = x0 + 125;
+    y1  = y0 + 40;
     x   = ev.xbutton.x;
     y   = ev.xbutton.y;
 
@@ -638,8 +649,6 @@ int isNumerico(char *pMsg){
 
     i = 0;
     while(i < strlen(msg)){
-            int ii = isdigit(msg[i]);
-
         if(isdigit(msg[i])){
             isNumerico = True;
         }
@@ -653,118 +662,98 @@ int isNumerico(char *pMsg){
     return isNumerico;
 }
 
-void showMsgBox(Datos win_padre, Datos foco, char *pMsg){
+void showMsgBox(Datos dat_padre, Datos dat_control_foco, char *pMsg){
     int         x, y, ancho, alto;
     int         x0, y0;
     int         len_msg;
     XFontStruct *xfs;
 
-    //
-    // Copiamos pMsg en msg_box
-    //
-    strcpy(dat_msg_box.msg, pMsg);
-
     xfs = XLoadQueryFont(dpy, FONT_N_B);
-    x0  = (int)(win_padre.ancho / 2);
-    y0  = (int)(win_padre.alto / 2);
+    x0  = (int)(dat_padre.ancho / 2);
+    y0  = (int)(dat_padre.alto / 2);
 
     //
     // Calculamos los valores
     //
-    len_msg = strlen(dat_msg_box.msg);
-    ancho   = XTextWidth(xfs, dat_msg_box.msg, len_msg) * 2;
+    len_msg = strlen(pMsg);
+    ancho   = XTextWidth(xfs, pMsg, len_msg) * 2;
     alto    = 200;
     x       = (x0 - (ancho / 2));
-    y       = y0 - 100;
+    y       = y0;
 
     //
-    // Creamosla nueva ventana solo si no existe
+    // Creamos la ventana
     //
-    win_msg_box = XCreateSimpleWindow(dpy,
-                                    win_padre.id,
+    dat_msg_box.id = XCreateSimpleWindow(dpy,
+                                    dat_padre.id,
                                     x,
                                     y,
                                     ancho,
                                     alto,
-                                    5,
+                                    0,
                                     negro,
-                                    gris);
+                                    gris_claro);
 
-    dat_msg_box.id          = win_padre.id;
-    dat_msg_box.ancho       = ancho;
-    dat_msg_box.alto        = alto;
-    dat_msg_box.padre       = foco.id;
-    dat_msg_box.is_enabled  = True;
-
-
-    XSelectInput(dpy, win_msg_box, ExposureMask | ButtonPressMask | KeyPressMask);
+    //
+    // Establecemos los tipos de eventos que queremos en la ventana principal
+    //
+    XSelectInput(dpy, dat_msg_box.id, ExposureMask | ButtonPressMask | KeyPressMask);
 
     //
     // Creamos el gc
     //
-    gc_msg_box = XCreateGC(dpy, win_msg_box, 0, 0);
+    dat_msg_box.gc = XCreateGC(dpy, dat_msg_box.id, 0, 0);
 
     //
-    // Establecemos el valor minimo de win_msg_box
+    // Guardamos los valores en dat_msg_box
     //
-    XSizeHints *tam_minimo = XAllocSizeHints();
+    dat_msg_box.padre       = dat_control_foco.id;
+    dat_msg_box.xfs         = xfs;
 
-    tam_minimo->flags        = PMinSize;
-    tam_minimo->min_width    = ancho;
-    tam_minimo->min_height   = alto;
-    XSetWMNormalHints(dpy, win_msg_box, tam_minimo);
+    dat_msg_box.x           = x;
+    dat_msg_box.y           = y;
+    dat_msg_box.ancho       = ancho;
+    dat_msg_box.alto        = alto;
 
-    XFree(tam_minimo);
+    strcpy(dat_msg_box.msg, pMsg);
+    dat_msg_box.is_enabled  = True;
+
+    XMapRaised(dpy, dat_msg_box.id);
 
     //
     // Mostramos el mensaje
     //
     pintaMsgBox();
-
-    //
-    // Mapeamos la pantalla
-    //
-    XMapRaised(dpy, win_msg_box);
-    XFlush(dpy);
-
-}
-
-void pintaMsgBox(){
-    int         len_msg;
-    int         ancho;
-    XFontStruct *xfs;
-
-    xfs         = XLoadQueryFont(dpy, FONT_N_B);
-    len_msg     = strlen(dat_msg_box.msg);
-    ancho       = XTextWidth(xfs, dat_msg_box.msg, len_msg) * 2;
-
-    setTexto(win_msg_box, gc_msg_box, dat_msg_box.msg, xfs, negro, 50, 75, (int)(ancho / 2) + 50, 50);
-
-    setUnClick(dpy, win_msg_box, gc_msg_box, ancho - 200, 125, 150, 50);
-    setTexto(win_msg_box, gc_msg_box, "Cerrar", xfs, negro, ancho - 150, 155, 100, 50);
-
 }
 
 void hideMsgBox(){
 
-
-    XFreeGC(dpy, gc_msg_box);
-    XUnmapWindow(dpy, win_msg_box);
-    XDestroyWindow(dpy, win_msg_box);
-
-    //win_msg_box = -1;
     dat_msg_box.is_enabled = False;
 
-    XFlush(dpy);
-
-    //
-    // Segun el padre pintamos la pantalla
-    //
-    if(dat_msg_box.id == w_edit){
-        pintaEdit();
-    }
+    XFreeGC(dpy, dat_msg_box.gc);
+    XUnmapWindow(dpy, dat_msg_box.id);
+    XDestroyWindow(dpy, dat_msg_box.id);
 
     setFocusEt(dat_msg_box.padre);
+
+    if(opt_menu == 2){
+        pintaEdit();
+    }
+}
+
+void pintaMsgBox(){
+    int x, y, ancho, alto;
+
+    ancho   = (int)(dat_msg_box.ancho / 2);
+    alto    = (int)(dat_msg_box.alto / 3);
+    x       = 100;
+    y       = 75;
+
+    setUnClick(dpy, dat_msg_box.id, dat_msg_box.gc, 2, 2, dat_msg_box.ancho - 4, dat_msg_box.alto -4);
+    setTexto(dat_msg_box.id, dat_msg_box.gc, dat_msg_box.msg, dat_msg_box.xfs, rojo, x, y, ancho, alto);
+    setUnClick(dpy, dat_msg_box.id, dat_msg_box.gc, dat_msg_box.ancho - 175, dat_msg_box.alto - 75, 125, 40);
+    setTexto(dat_msg_box.id, dat_msg_box.gc, "Cerrar", dat_msg_box.xfs, rojo, dat_msg_box.ancho -140, dat_msg_box.alto -50, 100, 30);
+
 }
 
 void pintaCursor(){
