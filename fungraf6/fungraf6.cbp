@@ -17,6 +17,7 @@
 				<Linker>
 					<Add library="X11" />
 					<Add library="Imlib2" />
+					<Add library="m" />
 				</Linker>
 			</Target>
 			<Target title="Release">

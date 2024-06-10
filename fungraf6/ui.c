@@ -653,8 +653,16 @@ int isNumerico(char *pMsg){
             isNumerico = True;
         }
         else{
-            isNumerico = False;
-            i = strlen(msg);
+            if(i == 0 && msg[i] == '-'){
+                isNumerico = True;
+            }
+            else if(msg[i] == '.'){
+                isNumerico = True;
+            }
+            else{
+                isNumerico = False;
+                i = strlen(msg);
+            }
         }
         i++;
     }

@@ -552,16 +552,6 @@ void pintaDatosPolinomicas(){
     //
     pintaFuncionPolinomica(15, 450, dat_win.ancho - 65, 200);
 
-    //
-    // Limites
-    //
-    pintaLimites(15, 700, (int)(2 * (dat_win.ancho / 3)), 150);
-
-    //
-    // Epsilon
-    //
-    pintaEpsilon((int)(2 * (dat_win.ancho / 3)) + 50 , 700, (int)(2 * (dat_win.ancho / 3)) -50, 150);
-
 }
 
 void pintaFuncionPolinomica(int x, int y , int ancho, int alto){
@@ -683,19 +673,6 @@ void pintaFuncionPolinomica(int x, int y , int ancho, int alto){
 
 
     XFlush(dpy);
-
-}
-
-void pintaLimites(int x, int y, int ancho, int alto){
-    char    msg[1024];
-    int     l0, l1;
-
-    //
-    //Leemos los limites
-    //
-}
-
-void pintaEpsilon(int x, int y, int ancho, int alto){
 
 }
 
@@ -881,7 +858,6 @@ void editKeyPress(XEvent ev){
 
 void etKeyReturnPressed(Datos etKeyReturnPressed){
 
-
     //
     // KeyPress del et[0]
     //
@@ -952,16 +928,14 @@ void etKeyReturnPressed(Datos etKeyReturnPressed){
         //
         // valor 2
         //
-        if(atoi(et[0].msg) == 1){
+        if(atoi(et[0].msg) == 2){
             sprintf(et[1].msg,"0");
             sprintf(et[2].msg,"0");
-            sprintf(et[3].msg,"0");
 
             et[1].is_enabled = False;
             et[2].is_enabled = False;
-            et[3].is_enabled = False;
 
-            setFocusEt(4);
+            setFocusEt(3);
         }
 
         //
@@ -1021,21 +995,58 @@ void etKeyReturnPressed(Datos etKeyReturnPressed){
     //
     // KeyPress del et[6]
     //
-    if(etKeyReturnPressed.id == et[6].id){
+    if(strlen(et[etKeyReturnPressed.id].msg) == 0 && etKeyReturnPressed.id == et[6].id){
+        setFocusEt(-1);
+        showMsgBox(dat_edit, etKeyReturnPressed, "Debes de indicar un limite inferior...");
+    }
+    else if( isNumerico(et[etKeyReturnPressed.id].msg) == False && etKeyReturnPressed.id == et[6].id){
+        setFocusEt(-1);
+        showMsgBox(dat_edit, etKeyReturnPressed, "El valor tiene que ser numerico...");
+    }
+    else if( etKeyReturnPressed.id == et[6].id){
         setFocusEt(7);
     }
 
     //
     // KeyPress del et[7]
     //
-    if(etKeyReturnPressed.id == et[7].id){
+    if(strlen(et[etKeyReturnPressed.id].msg) == 0 && etKeyReturnPressed.id == et[7].id){
+        setFocusEt(-1);
+        showMsgBox(dat_edit, etKeyReturnPressed, "Debes de indicar un limite Superior...");
+    }
+    else if(isNumerico(et[etKeyReturnPressed.id].msg) == False && etKeyReturnPressed.id == et[7].id){
+        setFocusEt(-1);
+        showMsgBox(dat_edit, etKeyReturnPressed, "El valor tiene que ser numerico...");
+    }
+    else if( (atoi(et[6].msg) >= atoi(et[7].msg)) && etKeyReturnPressed.id == et[7].id){
+        setFocusEt(-1);
+        showMsgBox(dat_edit, etKeyReturnPressed, "El limite superior tiene que ser mayor que el inferior...");
+    }
+    else if(etKeyReturnPressed.id == et[7].id){
+
+        //
+        // Grabamos los valores de lim0 y lim1
+        //
+        lim0 = atof(et[6].msg);
+        lim1 = atof(et[7].msg);
+
         setFocusEt(8);
     }
 
     //
     // KeyPress del et[8]
     //
-    if(etKeyReturnPressed.id == et[8].id){
+    if(strlen(et[etKeyReturnPressed.id].msg) == 0 && etKeyReturnPressed.id == et[8].id){
+        setFocusEt(-1);
+        showMsgBox(dat_edit, etKeyReturnPressed, "El limite superior tiene que ser mayor que el inferior...");
+    }
+    else if(etKeyReturnPressed.id == et[8].id){
+
+        //
+        // Grabamos el valor de epsilon
+        //
+        epsilon = atof(et[8].msg);
+
         setFocusEt(-1);
     }
 

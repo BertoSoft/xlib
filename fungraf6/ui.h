@@ -85,6 +85,9 @@ unsigned long   amarillo, gris, gris_claro;
 unsigned long   gris_oscuro, purpura;
 int             color_cursor;
 int             opt_menu;
+double          polinomio[5];
+double          lim0, lim1, epsilon;
+
 
 //
 // Funciones
