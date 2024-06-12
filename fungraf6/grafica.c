@@ -73,28 +73,25 @@ void pintaGrafica(){
     dat_grafica.alto    = dat_win.alto;
 
     pintaFuncion();
-    //pintaEjes();
+    pintaEjes();
 
 }
 
 void pintaEjes(){
-
-
-}
-
-void pintaFuncion(){
     double  xf_max, xf_min, yf_max, yf_min;
     int     xp_max, xp_min, yp_max, yp_min;
-    int     xp, yp;
+    int     xp, yp, i;
     double  it;
     double  pte_x, pte_y;
     int     cte_x, cte_y;
     char    valor[1024];
+    int     iscero;
 
     //
-    // Cargamos la fuente y establecemos el color
+    // Establecemos el color y los atributos de la linea
     //
     XSetForeground(dpy, gc_grafica, dat_grafica.color);
+    XSetLineAttributes( dpy, gc_grafica, 1, LineSolid, CapRound, JoinMiter);
 
     //
     // Maximos y minimos de la pantalla
@@ -123,15 +120,161 @@ void pintaFuncion(){
     //
     // Si hay Funcion la representamos
     //
+    if(xf_max > xf_min && epsilon > 0){
+
+        //
+        // Calculamos ptes y ctes
+        //
+        pte_x = (xp_max - xp_min) / (xf_max - xf_min);
+        pte_y = (yp_max - yp_min) / (yf_min - yf_max);
+
+        cte_x = xp_min - (pte_x * xf_min);
+        cte_y = yp_min - (pte_y * yf_max);
+
+        //
+        // Eje X
+        //
+        if(cte_y >= yp_min && cte_y <= yp_max){
+
+            //
+            // Dibujamos el eje x
+            //
+            XDrawLine(dpy, w_grafica, gc_grafica, xp_min, cte_y, xp_max, cte_y);
+
+            it  = xf_min;
+            i   = 0;
+            while(it <= (xf_max +epsilon)){
+
+                //
+                // Obtenemos el valor de xf con 4 decimales
+                //
+                sprintf(valor, "%0.4f", it);
+                xp = (it * pte_x) + cte_x;
+
+                //
+                // Comprobamos si valor == 0.0000
+                //
+                if(strcmp(valor, "-0.0000") == 0 || strcmp(valor, "0.0000") == 0){
+                    iscero = True;
+                }
+                else{
+                    iscero = False;
+                }
+
+                //
+                // Si no es cero pintamos el valor y la raya, grande si es par y pequeña si es impar
+                //
+                if(!iscero && i%2 == 0){
+                    XDrawLine(dpy, w_grafica, gc_grafica, xp, cte_y -10, xp, cte_y +10);
+                    XDrawString(dpy, w_grafica, gc_grafica, xp -20, cte_y +20, valor, strlen(valor));
+                }
+                else if(!iscero){
+                    XDrawLine(dpy, w_grafica, gc_grafica, xp, cte_y -5, xp, cte_y +5);
+                }
+
+                //
+                // Sumamos un nuevo intervalo a xf y a i
+                //
+                it += (xf_max -xf_min) / 20;
+                i++;
+            }
+        }
+
+
+        //
+        // Eje Y
+        //
+        if(cte_x >= xp_min && cte_x <= xp_max){
+
+            //
+            // Dibujamos eje y
+            //
+            XDrawLine(dpy, w_grafica, gc_grafica, cte_x, yp_max, cte_x, yp_min);
+
+            it  = yf_min;
+            i   = 0;
+            while(it <= (yf_max + epsilon)){
+
+                //
+                // Obtenemos el valor de Fx(xf), con 4 decimales
+                //
+                sprintf(valor, "%0.4f", it);
+                yp = (it * pte_y) + cte_y;
+
+                //
+                // Miramos si es 0.0000
+                //
+                if(strcmp(valor, "-0.0000") == 0 || strcmp(valor, "0.0000") == 0){
+                    iscero = True;
+                }
+                else{
+                    iscero = False;
+                }
+
+                //
+                // Si no es cero, pintamos raya grande si es par y pequeña si es impar
+                //
+                if(!iscero && i%2 == 0){
+                    XDrawLine(dpy, w_grafica, gc_grafica, cte_x - 10, yp, cte_x + 10, yp);
+                    XDrawString(dpy, w_grafica, gc_grafica, cte_x +20, yp +5, valor, strlen(valor));
+                }
+                else if(!iscero){
+                    XDrawLine(dpy, w_grafica, gc_grafica, cte_x - 5, yp, cte_x + 5, yp);
+                }
+
+                //
+                // Sumamos nuevo intervalo a Fx(xf)
+                //
+                it += (yf_max - yf_min) / 20;
+                i++;
+            }
+        }
+    }
+
+}
+
+void pintaFuncion(){
+    double  xf_max, xf_min, yf_max, yf_min;
+    int     xp_max, xp_min, yp_max, yp_min;
+    int     xp, yp;
+    double  it;
+    double  pte_x, pte_y;
+    int     cte_x, cte_y;
+
+    //
+    // Establecemos el color y los atributos de la linea
+    //
+    XSetForeground(dpy, gc_grafica, dat_grafica.color);
     XSetLineAttributes( dpy, gc_grafica, 1, LineSolid, CapRound, JoinMiter);
-    XDrawLine(dpy, w_grafica, gc_grafica, xp_min, yp_max, xp_max, yp_max);
-    XDrawLine(dpy, w_grafica, gc_grafica, xp_min, yp_min, xp_min, yp_max);
-    XDrawLine(dpy, w_grafica, gc_grafica, xp_max, yp_min, xp_max, yp_max);
-    XDrawLine(dpy, w_grafica, gc_grafica, xp_min, yp_min, xp_max, yp_min);
 
 
+    //
+    // Maximos y minimos de la pantalla
+    //
+    xp_max  = dat_grafica.ancho - 40;
+    xp_min  = 40;
+    yp_max  = dat_grafica.alto -40;
+    yp_min  = 40;
 
+    //
+    // Maximos y minimos de la funcion
+    //
+    if(lim1 > lim0 && epsilon > 0){
+        xf_max  = lim1;
+        xf_min  = lim0;
+        yf_max  = maxFx();
+        yf_min  = minFx();
+    }
+    else{
+        xf_max  = 0;
+        xf_min  = 0;
+        yf_max  = 0;
+        yf_min  = 0;
+    }
 
+    //
+    // Si hay Funcion la representamos
+    //
     if(xf_max > xf_min && epsilon > 0){
 
         pte_x = (xp_max - xp_min) / (xf_max - xf_min);
@@ -150,59 +293,7 @@ void pintaFuncion(){
 
             it += epsilon;
         }
-
-
-
-
-
-
-
-
-
-
-
-
-    it  = xf_min;
-    while(it <= xf_max + epsilon){
-
-        xp = (it * pte_x) + cte_x;
-
-        sprintf(valor, "%f", it);
-        XDrawString(dpy, w_grafica, gc_grafica, xp -20, yp_max +20, valor, strlen(valor));
-        it += (xf_max - xf_min) / 7;
     }
-
-
-
-    it  = yf_min;
-    while(it <= yf_max){
-
-        yp = (it * pte_y) + cte_y;
-
-        sprintf(valor, "%f", it);
-        XDrawString(dpy, w_grafica, gc_grafica, xp_min -20, yp, valor, strlen(valor));
-        it += (yf_max - yf_min) / 7;
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    }
-
-
-
 }
 
 double maxFx(){
