@@ -1,0 +1,27 @@
+# depslib dependency file v1.0
+1718735345 source:/home/alberto/programacion/2024/src/codeblock/xlib/ventanas1/main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<time.h>
+	<X11/Xlib.h>
+	"ui.h"
+	"w1.h"
+
+1718734735 source:/home/alberto/programacion/2024/src/codeblock/xlib/ventanas1/ui.c
+	<stdio.h>
+	<string.h>
+	"ui.h"
+	"w1.h"
+
+1718653395 /home/alberto/programacion/2024/src/codeblock/xlib/ventanas1/ui.h
+	<X11/Xlib.h>
+
+1718734735 source:/home/alberto/programacion/2024/src/codeblock/xlib/ventanas1/w1.c
+	<X11/Xlib.h>
+	"ui.h"
+	"w1.h"
+
+1718653764 /home/alberto/programacion/2024/src/codeblock/xlib/ventanas1/w1.h
+	<X11/Xlib.h>
+

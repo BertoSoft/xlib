@@ -1,0 +1,18 @@
+# depslib dependency file v1.0
+1718740189 source:/home/alberto/programacion/2024/src/codeblock/xlib/controles1/main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<time.h>
+	<X11/Xlib.h>
+	"ui.h"
+
+1718739934 /home/alberto/programacion/2024/src/codeblock/xlib/controles1/ui.h
+	<X11/Xlib.h>
+	<X11/Xutil.h>
+
+1718740189 source:/home/alberto/programacion/2024/src/codeblock/xlib/controles1/ui.c
+	<stdio.h>
+	<string.h>
+	"ui.h"
+
