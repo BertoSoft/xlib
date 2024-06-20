@@ -1,10 +1,25 @@
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 
 #include "ui.h"
+#include "open.h"
+
+
 
 void initUi(){
+    int         i;
+    XFontStruct *xfs;
+    char        *icono[] = {
+                            "./imagenes/abrir96.jpeg",
+                            "./imagenes/guardar96.jpeg",
+                            "./imagenes/edit96.png",
+                            "./imagenes/math96.png",
+                            "./imagenes/grafica96.png",
+                            "./imagenes/salir96.jpeg"
+                            };
+
 
     //
     //  Iniciamos los valores
@@ -30,40 +45,49 @@ void initUi(){
     //
     // Creamos las ventanas scr, menu, principal, y inferior
     //
-    dv_scr    = crearVentana(DefaultRootWindow(dpy), 0, 0, DisplayWidth(dpy, scr), DisplayHeight(dpy, scr), negro, blanco);
-    dv_menu   = crearVentana(dv_scr.id, dv_scr.ancho -90 -100, 0, 100, dv_scr.alto -60, negro, rojo);
-    dv_w      = crearVentana(dv_scr.id, 0, 0, dv_scr.ancho -90 -100, dv_scr.alto -60 -50, negro, azul);
-    dv_inf    = crearVentana(dv_scr.id, 0, dv_scr.alto -108, dv_scr.ancho -90 -100, 43, negro, amarillo);
+    w[0] = crearVentana(DefaultRootWindow(dpy), 0, 0, DisplayWidth(dpy, scr), DisplayHeight(dpy, scr), negro, gris_claro);
+    w[1] = crearVentana(w[0].id, w[0].ancho -103, 1, 100, w[0].alto -37, negro, gris);
+    w[2] = crearVentana(w[0].id, 1, 1, w[0].ancho -107, w[0].alto -37, negro, gris_claro);
+    w[3] = crearVentana(w[0].id, 0, w[0].alto -37, w[0].ancho -4, 44, negro, gris);
 
     //
     // Establecemos las propiedades de la ventana scr
     //
-    XSetStandardProperties(dpy, dv_scr.id, TITULO, TITULO, None, NULL, 0, NULL);
+    XSetStandardProperties(dpy, w[0].id, TITULO, TITULO, None, NULL, 0, NULL);
 
     //
     // Establecemos los tipos de eventos que queremos en la ventana principal
     //
-    XSelectInput(dpy, dv_scr.id, ExposureMask | ButtonPressMask | KeyPressMask | StructureNotifyMask );
-    XSelectInput(dpy, dv_menu.id, ExposureMask | ButtonPressMask | KeyPressMask);
-    XSelectInput(dpy, dv_w.id, ExposureMask | ButtonPressMask | KeyPressMask);
-    XSelectInput(dpy, dv_inf.id, ExposureMask | ButtonPressMask | KeyPressMask);
+    XSelectInput(dpy, w[0].id, ExposureMask | ButtonPressMask | KeyPressMask | StructureNotifyMask );
+    XSelectInput(dpy, w[1].id, ExposureMask | ButtonPressMask | KeyPressMask);
+    XSelectInput(dpy, w[2].id, ExposureMask | ButtonPressMask | KeyPressMask);
+    XSelectInput(dpy, w[3].id, ExposureMask | ButtonPressMask | KeyPressMask);
 
     //
     // Creamos los gcs
     //
-    dv_scr.gc   = XCreateGC(dpy, dv_scr.id, 0, 0);
-    dv_menu.gc  = XCreateGC(dpy, dv_menu.id, 0, 0);
-    dv_w.gc     = XCreateGC(dpy, dv_w.id, 0, 0);
-    dv_inf.gc   = XCreateGC(dpy, dv_inf.id, 0, 0);
-
+    w[0].gc = XCreateGC(dpy, w[0].id, 0, 0);
+    w[1].gc = XCreateGC(dpy, w[1].id, 0, 0);
+    w[2].gc = XCreateGC(dpy, w[2].id, 0, 0);
+    w[3].gc = XCreateGC(dpy, w[3].id, 0, 0);
 
     //
     // Mapeamos las ventanas
     //
-    XMapRaised(dpy, dv_scr.id);
-    XMapRaised(dpy, dv_menu.id);
-    XMapRaised(dpy, dv_w.id);
-    XMapRaised(dpy, dv_inf.id);
+    XMapRaised(dpy, w[0].id);
+    XMapRaised(dpy, w[1].id);
+    XMapRaised(dpy, w[2].id);
+    XMapRaised(dpy, w[3].id);
+
+    //
+    // Creamos los botones del menu
+    //
+    i   = 0;
+    xfs = XLoadQueryFont(dpy, FONT_N_B);
+    while(i < MAX_MENU){
+        btn[i] = crearBoton(w[1].id, 4, 4 +(i * ANCHO_BTN_MENU), 92, 92, xfs, "", loadImagen(dpy, w[1].id, icono[i]));
+        i++;
+    }
 
     //
     // Vaciamos el buffer grafico
@@ -74,11 +98,93 @@ void initUi(){
 
 void resizeUi(XEvent ev){
 
+    //
+    // Cambiamos las medidas
+    //
+    w[0].x       = ev.xconfigure.x;
+    w[0].y       = ev.xconfigure.y;
+    w[0].ancho   = ev.xconfigure.width;
+    w[0].alto    = ev.xconfigure.height;
+
+    //
+    // Establecemos el tamaño minimo de w[0]
+    //
+    XSizeHints *tam_minimo = XAllocSizeHints();
+
+    tam_minimo->flags        = PMinSize;
+    tam_minimo->min_width    = ev.xconfigure.width;
+    tam_minimo->min_height   = ev.xconfigure.height;
+    XSetWMNormalHints(dpy, w[0].id, tam_minimo);
+
+    XFree(tam_minimo);
+
+
+    w[2].x       = 1;
+    w[2].y       = 1;
+    w[2].ancho   = w[0].ancho -107;
+    w[2].alto    = w[0].alto -37;
+
+    w[1].x      = w[0].ancho -103;
+    w[1].y      = 1;
+    w[1].ancho  = 100;
+    w[1].alto   = w[0].alto -37;
+
+    w[3].x      = 0;
+    w[3].y      = w[0].alto -37;
+    w[3].ancho  = w[0].ancho -4;
+    w[3].alto   = 44;
+
 }
 
 void pintaUi(){
+    int i;
 
+    //
+    // Recolocamos todas las ventanas
+    //
+    XMoveResizeWindow(dpy, w[2].id, w[2].x, w[2].y, w[2].ancho, w[2].alto);
+    XMoveResizeWindow(dpy, w[1].id, w[1].x, w[1].y, w[1].ancho, w[1].alto);
+    XMoveResizeWindow(dpy, w[3].id, w[3].x, w[3].y, w[3].ancho, w[3].alto);
 
+    //
+    // Borramos la pantalla
+    //
+    XClearWindow(dpy, w[1].id);
+
+    //
+    // pintamos menu
+    //
+    i = 0;
+    while(i < MAX_MENU){
+        //
+        // Cargamos las imagenes
+        //
+        if(btn[i].img){
+            XPutImage(dpy, w[1].id, w[1].gc, btn[i].img, 0, 0, 4, 4 + (i * 100), 92, 92);
+        }
+
+        //
+        // Dibujamos el efecto boton
+        //
+        if(btn[i].is_cheked){
+            setClick(dpy, w[1].id, w[1].gc, btn[i].x, btn[i].y, btn[i].ancho, btn[i].alto);
+        }
+        else{
+            setUnClick(dpy, w[1].id, w[1].gc, btn[i].x, btn[i].y, btn[i].ancho, btn[i].alto);
+        }
+
+        i++;
+    }
+
+    //
+    // pintamos la barra inf
+    //
+    setClick(dpy, w[3].id, w[3].gc, 2, 2, (int) (w[3].ancho * 0.7), w[3].alto - 4);                             //  70%
+    setClick(dpy, w[3].id, w[3].gc, (int) (w[3].ancho * 0.7), 2, (int) (w[3].ancho * 0.2), w[3].alto - 4);      //  20%
+    setClick(dpy, w[3].id, w[3].gc, (int) (w[3].ancho * 0.9), 2, (int) (w[3].ancho * 0.1), w[3].alto -4);       //  10%
+    setFechaHora();
+
+    XFlush(dpy);
 }
 
 void closeUi(){
@@ -86,7 +192,7 @@ void closeUi(){
     //
     //  Cerramos la ventana principal
     //
-    cerrarVentana(dv_scr);
+    cerrarVentana(w[0]);
 
     //
     // Cerramos la conexion
@@ -94,6 +200,64 @@ void closeUi(){
     XCloseDisplay(dpy);
 }
 
+void menuClick(XEvent ev){
+    int i;
+    int x0, x1, y1, y0, x, y;
+    int opt;
+
+    x = ev.xbutton.x;
+    y = ev.xbutton.y;
+
+    //
+    // Obtenemos el boton pulsado
+    //
+    i   = 0;
+    opt = -1;
+    while(i < MAX_MENU){
+
+        x0 = btn[i].x;
+        x1 = btn[i].x + btn[i].ancho;
+        y0 = btn[i].y;
+        y1 = btn[i].y + btn[i].alto;
+
+        btn[i].is_cheked = False;
+        if(x0 < x && x < x1){
+            if(y0 < y && y < y1){
+                btn[i].is_cheked = True;
+                opt = i;
+            }
+        }
+        i++;
+    }
+
+    //
+    // Segun el boton presionado actuamos
+    //
+    switch(opt){
+        case 0:
+            if(!open.is_enabled){
+                showOpen();
+            }
+            break;
+        case 1:
+            break;
+        case 2:
+            break;
+        case 3:
+            break;
+        case 4:
+            break;
+        case 5:
+            closeUi();
+            exit(0);
+            break;
+    }
+
+    //
+    // Pintamos la UI
+    //
+    pintaUi();
+}
 
 
 
@@ -129,6 +293,21 @@ DatosWindow crearVentana(Window padre, int x, int y, int ancho, int alto, unsign
     XSetWMProtocols(dpy, dww.id, &cerrar_ventana, 1);
 
     return dww;
+}
+
+DatosBoton crearBoton(Window padre, int x, int y, int ancho, int alto, XFontStruct *xfs, char *texto, XImage *img){
+    DatosBoton btn;
+
+    btn.padre   = padre;
+    btn.x       = x;
+    btn.y       = y;
+    btn.ancho   = ancho;
+    btn.alto    = alto;
+    btn.img     = img;
+    btn.xfs     = xfs;
+    strcpy(btn.texto, texto);
+
+    return btn;
 }
 
 void cerrarVentana(DatosWindow dww){
@@ -177,6 +356,39 @@ void setUnClick(Display *d, Window w, GC gc, int x, int y, int ancho, int alto){
 
 }
 
+void setFechaHora(){
+    char            msg[1024];
+    int             x, y, ancho, alto;
+    XFontStruct     *xfs;
+    time_t          time_actual;
+    struct tm       *tm_actual;
+
+    time_actual = time(NULL);
+    tm_actual   = localtime(&time_actual);
+    xfs         = XLoadQueryFont(dpy, FONT_N_B);
+
+    x       = (int) (w[3].ancho * 0.7) + 10;
+    y       = (int) (w[3].alto / 2) + 5;
+    ancho   = (int) (w[3].ancho * 0.18);
+    alto    = w[3].alto;
+
+    strftime(msg, 1023, "%A, %d de %B de %Y", tm_actual);
+    XSetForeground(dpy, w[3].gc, w[3].back_color);
+    XFillRectangle(dpy, w[3].id, w[3].gc, (int)(w[3].ancho * 0.7) + 2, 4, ancho, 46);
+    setTexto(w[3].id, w[3].gc, msg, xfs, azul, x, y, ancho, alto);
+
+    x       = (int) (w[3].ancho * 0.9) + 50;
+    y       = (int) (w[3].alto / 2) + 5;
+    ancho   = (int) (w[3].ancho * 0.1);
+    alto    = w[3].alto;
+
+    strftime(msg, 1023, "%X", tm_actual);
+    XSetForeground(dpy, w[3].gc, w[3].back_color);
+    XFillRectangle(dpy, w[3].id, w[3].gc, (int)(w[3].ancho * 0.9) + 2, 4, ancho, 46);
+    setTexto(w[3].id, w[3].gc, msg, xfs, azul, x, y, ancho, alto);
+
+}
+
 unsigned long colorPorNombre( Display *dis, char *nombre ){
   XColor color, temp;
 
@@ -220,3 +432,65 @@ void setTexto(Window w, GC gc, char *msg, XFontStruct *xfs, unsigned long color,
     XSetForeground(dpy, gc, color);
     XDrawString(dpy, w, gc, x0, y0, msg, tam);
 }
+
+XImage *loadImagen(Display *display, Window w, char *ruta){
+    Pixmap      pix;
+    Imlib_Image imlib_img;
+    int         ancho, alto;
+    Screen      *scr;
+    XImage      *x_img;
+
+    //
+    // Leemos el archivo
+    //
+    imlib_img = imlib_load_image(ruta);
+
+    //
+    // Si el archivo no existe, devolvemos nulo
+    //
+    if(imlib_img == 0x0){
+        x_img = NULL;
+    }
+    //
+    // Si el archivo existe devolvemos *XImage
+    //
+    else{
+
+    //
+    // Establecemos los contextos
+    //
+    imlib_context_set_image(imlib_img);
+    ancho   = imlib_image_get_width();
+    alto    = imlib_image_get_height();
+
+    //
+    // Obtenemos la pantalla por defecto y creamos el pixmap vacío
+    //
+    scr = DefaultScreenOfDisplay(display);
+    pix = XCreatePixmap(display, w, ancho, alto, DefaultDepthOfScreen(scr));
+
+    //
+    // Establecemos valores de imlib
+    //
+    imlib_context_set_display(display);
+    imlib_context_set_visual(DefaultVisualOfScreen(scr));
+    imlib_context_set_colormap(DefaultColormapOfScreen(scr));
+    imlib_context_set_drawable(pix);
+
+    //
+    // Copiamos la imagen imlib en pixmap
+    //
+    imlib_render_image_on_drawable(0, 0);
+
+    //
+    // Pasamos el pixmap a XImage
+    //
+    x_img = XGetImage(display, pix, 0, 0, ancho, alto, 0xFFFFFFFF, ZPixmap);
+
+    XFreePixmap(display, pix);
+    }
+
+    return x_img;
+}
+
+

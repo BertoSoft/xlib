@@ -1,8 +1,15 @@
 #ifndef UI_H_INCLUDED
 #define UI_H_INCLUDED
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include <Imlib2.h>
 
 #define TITULO "Controles V 1.0"
 
@@ -35,6 +42,10 @@
 #define FONT_N_B            "9x15bold"
 #define FONT_N              "9x15"
 
+#define MAX_MENU        6       // Numero de botones del menu
+#define ANCHO_BTN_MENU  100     // Ancho de los botones del menu
+
+
 //
 // Estructuras
 //
@@ -52,11 +63,14 @@ typedef struct{
 }DatosWindow;
 
 typedef struct{
+    Window          padre;
     int             x;
     int             y;
     int             ancho;
     int             alto;
     int             is_cheked;
+    XImage          *img;
+    XFontStruct     *xfs;
     char            texto[1024];
     unsigned long   color;
     unsigned long   back_color;
@@ -67,7 +81,8 @@ typedef struct{
 //
 Display         *dpy;
 int             scr;
-DatosWindow     dv_scr, dv_menu, dv_w, dv_inf;
+DatosWindow     w[4], open;
+DatosBoton      btn[MAX_MENU];
 Atom            cerrar_ventana;
 unsigned long   blanco, negro;
 unsigned long   azul, azure, rojo;
@@ -78,13 +93,17 @@ void            initUi();
 void            closeUi();
 void            resizeUi(XEvent ev);
 void            pintaUi();
+void            menuClick(XEvent ev);
 
 DatosWindow     crearVentana(Window padre, int x, int y, int ancho, int alto, unsigned long color, unsigned long back_color);
+DatosBoton      crearBoton(Window padre, int x, int y, int ancho, int alto, XFontStruct *xfs, char *msg, XImage *img);
 void            cerrarVentana(DatosWindow dww);
 unsigned long   colorPorNombre( Display *dis, char *nombre );
 void            setUnClick(Display *d, Window w, GC gc, int x, int y, int ancho, int alto);
 void            setClick(Display *d, Window w, GC gc, int x, int y, int ancho, int alto);
 void            setTexto(Window w, GC gc, char *msg, XFontStruct *xfs, unsigned long color, int x0, int y0, int ancho, int alto);
+void            setFechaHora();
+XImage          *loadImagen(Display *display, Window w, char *ruta);
 
 
 #endif // UI_H_INCLUDED

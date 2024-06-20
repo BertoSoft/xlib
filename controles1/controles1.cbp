@@ -34,9 +34,16 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
+		<Linker>
+			<Add library="Imlib2" />
+		</Linker>
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="open.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="open.h" />
 		<Unit filename="ui.c">
 			<Option compilerVar="CC" />
 		</Unit>

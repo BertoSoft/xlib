@@ -1,18 +1,33 @@
 # depslib dependency file v1.0
-1718740189 source:/home/alberto/programacion/2024/src/codeblock/xlib/controles1/main.c
+1718912853 source:/home/alberto/programacion/2024/src/codeblock/xlib/controles1/main.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
 	<time.h>
 	<X11/Xlib.h>
 	"ui.h"
+	"open.h"
 
-1718739934 /home/alberto/programacion/2024/src/codeblock/xlib/controles1/ui.h
+1718912998 /home/alberto/programacion/2024/src/codeblock/xlib/controles1/ui.h
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<time.h>
 	<X11/Xlib.h>
 	<X11/Xutil.h>
+	<Imlib2.h>
 
-1718740189 source:/home/alberto/programacion/2024/src/codeblock/xlib/controles1/ui.c
+1718912958 source:/home/alberto/programacion/2024/src/codeblock/xlib/controles1/ui.c
 	<stdio.h>
 	<string.h>
+	<time.h>
+	"ui.h"
+	"open.h"
+
+1718912655 source:/home/alberto/programacion/2024/src/codeblock/xlib/controles1/open.c
+	"open.h"
+	"ui.h"
+
+1718910561 /home/alberto/programacion/2024/src/codeblock/xlib/controles1/open.h
 	"ui.h"
 
