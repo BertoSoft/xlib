@@ -9,6 +9,7 @@
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include <X11/Xatom.h>
 #include <Imlib2.h>
 
 #define TITULO "Controles V 1.0"
@@ -76,6 +77,17 @@ typedef struct{
     unsigned long   back_color;
 }DatosBoton;
 
+typedef struct{
+    int is_focused;
+    int is_hidden;
+    int is_maximized;
+    int is_activa;
+    int is_above;
+    int is_below;
+    int is_skip;
+    int is_shaded;
+}DatosStates;
+
 //
 // Variables
 //
@@ -88,12 +100,14 @@ unsigned long   blanco, negro;
 unsigned long   azul, azure, rojo;
 unsigned long   amarillo, gris, gris_claro;
 unsigned long   gris_oscuro, purpura;
+int             contador;
 
 void            initUi();
 void            closeUi();
 void            resizeUi(XEvent ev);
 void            pintaUi();
 void            menuClick(XEvent ev);
+int             getMenuPulsado(XEvent ev);
 
 DatosWindow     crearVentana(Window padre, int x, int y, int ancho, int alto, unsigned long color, unsigned long back_color);
 DatosBoton      crearBoton(Window padre, int x, int y, int ancho, int alto, XFontStruct *xfs, char *msg, XImage *img);
@@ -103,7 +117,9 @@ void            setUnClick(Display *d, Window w, GC gc, int x, int y, int ancho,
 void            setClick(Display *d, Window w, GC gc, int x, int y, int ancho, int alto);
 void            setTexto(Window w, GC gc, char *msg, XFontStruct *xfs, unsigned long color, int x0, int y0, int ancho, int alto);
 void            setFechaHora();
+void            setActiveWindow(Window w);
 XImage          *loadImagen(Display *display, Window w, char *ruta);
-
+Window          getWindowsActiva();
+DatosStates     getWindowStates(Window w);
 
 #endif // UI_H_INCLUDED

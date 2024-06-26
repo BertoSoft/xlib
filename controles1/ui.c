@@ -41,6 +41,10 @@ void initUi(){
     gris_oscuro = colorPorNombre(dpy, "DarkSlateGray");
     gris_claro  = colorPorNombre(dpy, "LightGray");
 
+    //
+    // Definimos los Atoms
+    //
+    cerrar_ventana      = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
 
     //
     // Creamos las ventanas scr, menu, principal, y inferior
@@ -54,22 +58,6 @@ void initUi(){
     // Establecemos las propiedades de la ventana scr
     //
     XSetStandardProperties(dpy, w[0].id, TITULO, TITULO, None, NULL, 0, NULL);
-
-    //
-    // Establecemos los tipos de eventos que queremos en la ventana principal
-    //
-    XSelectInput(dpy, w[0].id, ExposureMask | ButtonPressMask | KeyPressMask | StructureNotifyMask );
-    XSelectInput(dpy, w[1].id, ExposureMask | ButtonPressMask | KeyPressMask);
-    XSelectInput(dpy, w[2].id, ExposureMask | ButtonPressMask | KeyPressMask);
-    XSelectInput(dpy, w[3].id, ExposureMask | ButtonPressMask | KeyPressMask);
-
-    //
-    // Creamos los gcs
-    //
-    w[0].gc = XCreateGC(dpy, w[0].id, 0, 0);
-    w[1].gc = XCreateGC(dpy, w[1].id, 0, 0);
-    w[2].gc = XCreateGC(dpy, w[2].id, 0, 0);
-    w[3].gc = XCreateGC(dpy, w[3].id, 0, 0);
 
     //
     // Mapeamos las ventanas
@@ -118,7 +106,6 @@ void resizeUi(XEvent ev){
 
     XFree(tam_minimo);
 
-
     w[2].x       = 1;
     w[2].y       = 1;
     w[2].ancho   = w[0].ancho -107;
@@ -149,7 +136,7 @@ void pintaUi(){
     //
     // Borramos la pantalla
     //
-    XClearWindow(dpy, w[1].id);
+    XClearWindow(dpy, w[2].id);
 
     //
     // pintamos menu
@@ -201,38 +188,13 @@ void closeUi(){
 }
 
 void menuClick(XEvent ev){
-    int i;
-    int x0, x1, y1, y0, x, y;
     int opt;
 
-    x = ev.xbutton.x;
-    y = ev.xbutton.y;
-
     //
-    // Obtenemos el boton pulsado
+    // Si se ha pulsado el menu, obtenemos el boton pulsado
     //
-    i   = 0;
-    opt = -1;
-    while(i < MAX_MENU){
+    opt = getMenuPulsado(ev);
 
-        x0 = btn[i].x;
-        x1 = btn[i].x + btn[i].ancho;
-        y0 = btn[i].y;
-        y1 = btn[i].y + btn[i].alto;
-
-        btn[i].is_cheked = False;
-        if(x0 < x && x < x1){
-            if(y0 < y && y < y1){
-                btn[i].is_cheked = True;
-                opt = i;
-            }
-        }
-        i++;
-    }
-
-    //
-    // Segun el boton presionado actuamos
-    //
     switch(opt){
         case 0:
             if(!open.is_enabled){
@@ -251,6 +213,8 @@ void menuClick(XEvent ev){
             closeUi();
             exit(0);
             break;
+        default:
+            break;
     }
 
     //
@@ -259,6 +223,34 @@ void menuClick(XEvent ev){
     pintaUi();
 }
 
+int getMenuPulsado(XEvent ev){
+    int i;
+    int x0, x1, y1, y0, x, y;
+    int opt;
+
+    x = ev.xbutton.x;
+    y = ev.xbutton.y;
+
+    i   = 0;
+    opt = -1;
+    while(i < MAX_MENU){
+
+        x0 = btn[i].x;
+        x1 = btn[i].x + btn[i].ancho;
+        y0 = btn[i].y;
+        y1 = btn[i].y + btn[i].alto;
+
+        btn[i].is_cheked = False;
+        if(x0 < x && x < x1){
+            if(y0 < y && y < y1){
+                btn[i].is_cheked = True;
+                opt = i;
+            }
+        }
+        i++;
+    }
+    return opt;
+}
 
 
 
@@ -285,12 +277,21 @@ DatosWindow crearVentana(Window padre, int x, int y, int ancho, int alto, unsign
     dww.color        = color;
     dww.back_color   = back_color;
 
-    XSelectInput(dpy, dww.id, ExposureMask | KeyPressMask | ButtonPressMask | StructureNotifyMask | SubstructureNotifyMask | FocusChangeMask);
+    XSelectInput(dpy, dww.id, ExposureMask |
+                                KeyPressMask |
+                                ButtonPressMask |
+                                StructureNotifyMask |
+                                FocusChangeMask |
+                                PropertyChangeMask
+                                );
 
     dww.gc = XCreateGC(dpy, dww.id, 0, 0);
 
-    cerrar_ventana = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
+    //
+    // Definimos el Atom WM_DELETE
+    //
     XSetWMProtocols(dpy, dww.id, &cerrar_ventana, 1);
+
 
     return dww;
 }
@@ -353,6 +354,24 @@ void setUnClick(Display *d, Window w, GC gc, int x, int y, int ancho, int alto){
     XSetForeground( d, gc, gris_oscuro);
     XDrawLine( d, w, gc, x, y + alto, x + ancho, y + alto);                     // H2
     XDrawLine( d, w, gc, x + ancho, y, x + ancho, y + alto);                    // V2
+
+}
+
+void setActiveWindow(Window w){
+    XClientMessageEvent ev;
+    Atom                ventana_activa = XInternAtom(dpy, "_NET_ACTIVE_WINDOW", True);
+
+
+    memset (&ev, 0, sizeof ev);
+    ev.type = ClientMessage;
+    ev.window = w;
+    ev.message_type = ventana_activa;
+    ev.format = 32;
+    ev.data.l[0] = 1;
+    ev.data.l[1] = CurrentTime;
+    ev.data.l[2] = ev.data.l[3] = ev.data.l[4] = 0;
+
+    XSendEvent (dpy, RootWindow(dpy, XDefaultScreen(dpy)), False, SubstructureRedirectMask |SubstructureNotifyMask, (XEvent*)&ev);
 
 }
 
@@ -492,5 +511,115 @@ XImage *loadImagen(Display *display, Window w, char *ruta){
 
     return x_img;
 }
+
+Window getWindowsActiva(){
+    Window  ww;
+
+    ww  = -1;
+
+    if(w[0].is_enabled == True){ ww = w[0].id;}
+    if(open.is_enabled == True){ ww = open.id;}
+
+    return ww;
+}
+
+DatosStates getWindowStates(Window w){
+    DatosStates     dStates;
+    int             max_horz, max_vert;
+    int             i;
+    long            max_lenght  = 1024;
+    Atom            atom_actual;
+    int             formato_actual;
+    unsigned long   bytes_despues, numero_stados = 0;
+    Atom            *states = NULL;
+
+    //
+    // Este el atom de deteccion de wm_states
+    //
+    Atom wm_state   = XInternAtom(dpy, "_NET_WM_STATE", True);
+
+    //
+    // Atoms de los distintos estados
+    //
+    Atom wm_hiden   = XInternAtom(dpy, "_NET_WM_STATE_HIDDEN", True);
+    Atom wm_focused = XInternAtom(dpy, "_NET_WM_STATE_FOCUSED", True);
+    Atom wm_maxhorz = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_HORZ", True);
+    Atom wm_maxvert = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_VERT", True);
+    Atom wm_above   = XInternAtom(dpy, "_NET_WM_STATE_ABOVE", True);
+    Atom wm_below   = XInternAtom(dpy, "_NET_WM_STATE_BELOW", True);
+    Atom wm_skip    = XInternAtom(dpy, "_NET_WM_STATE_SKIP_TASKBAR", True);
+    Atom wm_shaded  = XInternAtom(dpy, "_NET_WM_STATE_SHADED", True);
+
+
+    //
+    // Iniciamos todas las dStados en -1
+    //
+    max_horz = -1;
+    max_vert = -1;
+
+    dStates.is_hidden       = -1;
+    dStates.is_focused      = -1;
+    dStates.is_maximized    = -1;
+    dStates.is_activa       = -1;
+    dStates.is_above        = -1;
+    dStates.is_below        = -1;
+    dStates.is_skip         = -1;
+    dStates.is_shaded       = -1;
+
+    //
+    // Obtenemos el windowsproperty para los estados _NET_WM_STATES
+    //
+    if(XGetWindowProperty(
+        dpy,
+        w,
+        wm_state,
+        0l,          //no offset
+        max_lenght,
+        False,       // no delete
+        XA_ATOM,
+        &atom_actual,
+        &formato_actual,
+        &numero_stados,
+        &bytes_despues,
+        (unsigned char **)&states
+    ) == Success){
+
+        i = 0;
+        while(i < numero_stados){
+
+            if(states[i] == wm_hiden){
+                dStates.is_hidden = True;
+            }
+            else if(states[i] == wm_focused){
+                dStates.is_focused = True;
+            }
+            else if(states[i] == wm_maxhorz ){
+                max_horz = True;
+            }
+            else if(states[i] == wm_maxvert ){
+                max_vert = True;
+            }
+            else if(states[i] == wm_above){
+                dStates.is_above = True;
+            }
+            else if(states[i] == wm_below){
+                dStates.is_below = True;
+            }
+            else if(states[i] == wm_skip){
+                dStates.is_skip = True;
+            }
+            else if(states[i] == wm_shaded){
+                dStates.is_shaded = True;
+            }
+            i++;
+        }
+        if(max_horz == True && max_vert == True){
+            dStates.is_maximized = True;
+        }
+    }
+
+    return dStates;
+}
+
 
 

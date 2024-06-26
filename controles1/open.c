@@ -21,6 +21,19 @@ void initOpen(){
     open = crearVentana(DefaultRootWindow(dpy), x, y, ancho, alto, negro, blanco);
 
     //
+    // Establecemos el tamaño fijo de open
+    //
+    XSizeHints *tam = XAllocSizeHints();
+
+    tam->flags        = PMinSize | PMaxSize;
+    tam->min_width    = tam->max_height = ancho;
+    tam->min_height   = tam->max_height = alto;
+
+    XSetWMNormalHints(dpy, open.id, tam);
+
+    XFree(tam);
+
+    //
     // La mepeamos
     //
     XMapRaised(dpy, open.id);
@@ -48,7 +61,16 @@ void pintaOpen(){
 
 void closeOpen(){
 
+    //
+    // Cerramos open
+    //
     cerrarVentana(open);
     open.is_enabled     = False;
+
+    //
+    // Activamos w[0], y repintamos el menu
+    //
     w[0].is_enabled     = True;
+    btn[0].is_cheked    = False;
+    pintaUi();
 }
