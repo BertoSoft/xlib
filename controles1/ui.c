@@ -42,6 +42,11 @@ void initUi(){
     gris_claro  = colorPorNombre(dpy, "LightGray");
 
     //
+    // Colocamos el contador de ets en cero
+    //
+    max_et = 0;
+
+    //
     // Definimos los Atoms
     //
     cerrar_ventana      = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
@@ -311,6 +316,39 @@ DatosBoton crearBoton(Window padre, int x, int y, int ancho, int alto, XFontStru
     return btn;
 }
 
+DatosEt crearEditText(Window padre, int x, int y, int ancho, int alto, XFontStruct *xfs, char *msg, unsigned long color, unsigned long back_color){
+    DatosEt et;
+
+    //
+    // Numero de ets en este formulario
+    //
+    max_et ++;
+
+    //
+    // Relleno los datos
+    //
+    et.padre        = padre;
+    et.x            = x;
+    et.y            = y;
+    et.ancho        = ancho;
+    et.alto         = alto;
+    et.xfs          = xfs;
+    et.is_enabled   = True;
+    strcpy(et.msg, msg);
+
+    //
+    // Si solo hay uno le doy el foco
+    //
+    if(max_et == 1){
+        et.is_focused   = True;
+    }
+    else{
+        et.is_focused   = False;
+    }
+
+    return et;
+}
+
 void cerrarVentana(DatosWindow dww){
 
     XFreeGC(dpy, dww.gc);
@@ -554,17 +592,17 @@ DatosStates getWindowStates(Window w){
     //
     // Iniciamos todas las dStados en -1
     //
-    max_horz = -1;
-    max_vert = -1;
+    max_horz = 0;
+    max_vert = 0;
 
-    dStates.is_hidden       = -1;
-    dStates.is_focused      = -1;
-    dStates.is_maximized    = -1;
-    dStates.is_activa       = -1;
-    dStates.is_above        = -1;
-    dStates.is_below        = -1;
-    dStates.is_skip         = -1;
-    dStates.is_shaded       = -1;
+    dStates.is_hidden       = 0;
+    dStates.is_focused      = 0;
+    dStates.is_maximized    = 0;
+    dStates.is_activa       = 0;
+    dStates.is_above        = 0;
+    dStates.is_below        = 0;
+    dStates.is_skip         = 0;
+    dStates.is_shaded       = 0;
 
     //
     // Obtenemos el windowsproperty para los estados _NET_WM_STATES

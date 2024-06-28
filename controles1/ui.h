@@ -78,6 +78,21 @@ typedef struct{
 }DatosBoton;
 
 typedef struct{
+    Window          padre;
+    int             x;
+    int             y;
+    int             ancho;
+    int             alto;
+    XFontStruct     *xfs;
+    char            msg[1024];
+    char            msg_visual[1024];
+    int             is_enabled;
+    int             is_focused;
+    unsigned long   color;
+    unsigned long   back_color;
+}DatosEt;
+
+typedef struct{
     int is_focused;
     int is_hidden;
     int is_maximized;
@@ -87,6 +102,13 @@ typedef struct{
     int is_skip;
     int is_shaded;
 }DatosStates;
+
+typedef struct{
+int     num_directorios;
+char    directorio[1024][1024];
+int     num_archivos;
+char    archivo[1024][1024];
+}DatosDir;
 
 //
 // Variables
@@ -100,7 +122,6 @@ unsigned long   blanco, negro;
 unsigned long   azul, azure, rojo;
 unsigned long   amarillo, gris, gris_claro;
 unsigned long   gris_oscuro, purpura;
-int             contador;
 
 void            initUi();
 void            closeUi();
@@ -111,6 +132,7 @@ int             getMenuPulsado(XEvent ev);
 
 DatosWindow     crearVentana(Window padre, int x, int y, int ancho, int alto, unsigned long color, unsigned long back_color);
 DatosBoton      crearBoton(Window padre, int x, int y, int ancho, int alto, XFontStruct *xfs, char *msg, XImage *img);
+DatosEt         crearEditText(Window padre, int x, int y, int ancho, int alto, XFontStruct *xfs, char *msg, unsigned long color, unsigned long back_color);
 void            cerrarVentana(DatosWindow dww);
 unsigned long   colorPorNombre( Display *dis, char *nombre );
 void            setUnClick(Display *d, Window w, GC gc, int x, int y, int ancho, int alto);

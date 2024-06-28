@@ -23,7 +23,6 @@ int main(){
     XEvent ev;
 
     initUi();
-    contador = 0;
 
     while(1){
 
@@ -109,31 +108,54 @@ void eventoExposure(XEvent ev){
 void eventoButtonPress(XEvent ev){
 
     //
+    // Si w[0].is_enabled = false y pinchamo en cualeuier parte de w[0], traemos al frente getWindowsActiva()
+    //
+    if(ev.xbutton.window == w[1].id ||
+       ev.xbutton.window == w[2].id ||
+       ev.xbutton.window == w[3].id){
+
+        DatosStates states = getWindowStates(getWindowsActiva());
+        if(!w[0].is_enabled && states.is_hidden){
+
+            setActiveWindow(getWindowsActiva());
+        }
+       }
+
+    //
     // Si el foco esta en menu y w[0] esta habilitada
     //
-    if(ev.xfocus.window == w[1].id && w[0].is_enabled == True){
+    if(ev.xbutton.window == w[1].id && w[0].is_enabled == True){
         menuClick(ev);
+    }
+
+    //
+    // Si el foco esta en open lo mandamos a openClick()
+    //
+    if(ev.xbutton.window == open.id){
+        openClick(ev);
     }
 }
 
 void eventoFocusIn(XEvent ev){
+    DatosStates states = getWindowStates(getWindowsActiva());
+
+    if(ev.xfocus.window == w[0].id && w[0].is_enabled == False && !states.is_hidden){
+        setActiveWindow(getWindowsActiva());
+    }
 
 }
 
 void eventoFocusOut(XEvent ev){
 
-    //
-    // Si la ventana activa pierde el foco se lo devolvemos
-    //
-    if(ev.xfocus.window == getWindowsActiva() && w[0].is_enabled == False){
-        XSetInputFocus(dpy, getWindowsActiva(), RevertToParent, CurrentTime);
-        XRaiseWindow(dpy, getWindowsActiva());
-    }
+
 }
 
 void eventoConfigureNotify(XEvent ev){
 
-    if(ev.xfocus.window == w[0].id){
+    //
+    // Si la w[0], cambia de tamaño
+    //
+    if(ev.xconfigure.window == w[0].id){
         resizeUi(ev);
     }
 }
@@ -159,60 +181,5 @@ void eventoClientMessage(XEvent ev){
 }
 
 void eventoPropertyNotify(XEvent ev){
-    DatosStates states, states_w0;
-    Atom        wm_state = XInternAtom(dpy, "_NET_WM_STATE", True);
-
-
-    char strEstadoOpen[1024];
-    char strEstadoW0[1024];
-    contador++;
-
-    //
-    // hay un XProperty  _NET_WM_STATE en la ventana activa y w[0].is_enabled == False
-    //
-    if(ev.xproperty.window == getWindowsActiva() && w[0].is_enabled == False && ev.xproperty.atom == wm_state){
-        states      = getWindowStates(getWindowsActiva());
-        states_w0   = getWindowStates(w[0].id);
-
-        //
-        // Si la ventana activa se minimiza la principal tb
-        //
-        if(states.is_hidden == True && states_w0.is_maximized == True){
-            sprintf(strEstadoOpen, "hidden");
-            sprintf(strEstadoW0, "Maximized");
-        }
-
-        //
-        // Si la ventana activa se maximiza la principal tb
-        //
-        if(states.is_maximized == True && states_w0.is_hidden == True){
-            sprintf(strEstadoOpen, "Maximized");
-            sprintf(strEstadoW0, "Hidden");        }
-    }
-
-    //
-    // Hay un xProperty _NET_WM_STATE en la w[0] y esta esta inactiva
-    //
-    if(ev.xproperty.window == w[0].id && w[0].is_enabled == False && ev.xproperty.atom == wm_state){
-        states      = getWindowStates(getWindowsActiva());
-        states_w0   = getWindowStates(w[0].id);
-
-        //
-        // Si w0 esta inactiva y se minimiza, minimizamos la ventana activa
-        //
-        if(states_w0.is_hidden == True && states.is_maximized == True){
-            sprintf(strEstadoOpen, "Maximized");
-            sprintf(strEstadoW0, "Hidden");
-        }
-
-        //
-        // Si w0 esta inactiva y se maximiza, maximizamos la ventana activa
-        //
-        if(states_w0.is_maximized == True && states.is_hidden == True){
-            sprintf(strEstadoOpen, "hidden");
-            sprintf(strEstadoW0, "Maximized");        }
-    }
-
-    int k = 0;
 
 }

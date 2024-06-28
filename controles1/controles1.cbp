@@ -28,6 +28,7 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add library="X11" />
 				</Linker>
 			</Target>
 		</Build>
