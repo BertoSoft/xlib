@@ -47,6 +47,16 @@ void initUi(){
     max_et = 0;
 
     //
+    // Establecemos file_open en nulo
+    //
+    file_open[0] = '\0';
+
+    //
+    // Iniciamos old_time;
+    //
+    old_time = time(NULL);
+
+    //
     // Definimos los Atoms
     //
     cerrar_ventana      = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
@@ -207,6 +217,9 @@ void menuClick(XEvent ev){
             }
             break;
         case 1:
+            if(opt == 3){
+
+            };
             break;
         case 2:
             break;
@@ -285,6 +298,7 @@ DatosWindow crearVentana(Window padre, int x, int y, int ancho, int alto, unsign
     XSelectInput(dpy, dww.id, ExposureMask |
                                 KeyPressMask |
                                 ButtonPressMask |
+                                ButtonReleaseMask |
                                 StructureNotifyMask |
                                 FocusChangeMask |
                                 PropertyChangeMask
@@ -304,13 +318,15 @@ DatosWindow crearVentana(Window padre, int x, int y, int ancho, int alto, unsign
 DatosBoton crearBoton(Window padre, int x, int y, int ancho, int alto, XFontStruct *xfs, char *texto, XImage *img){
     DatosBoton btn;
 
-    btn.padre   = padre;
-    btn.x       = x;
-    btn.y       = y;
-    btn.ancho   = ancho;
-    btn.alto    = alto;
-    btn.img     = img;
-    btn.xfs     = xfs;
+    btn.padre       = padre;
+    btn.x           = x;
+    btn.y           = y;
+    btn.ancho       = ancho;
+    btn.alto        = alto;
+    btn.color       = w[2].color;
+    btn.back_color  = w[2].back_color;
+    btn.img         = img;
+    btn.xfs         = xfs;
     strcpy(btn.texto, texto);
 
     return btn;

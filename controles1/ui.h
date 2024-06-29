@@ -122,6 +122,8 @@ unsigned long   blanco, negro;
 unsigned long   azul, azure, rojo;
 unsigned long   amarillo, gris, gris_claro;
 unsigned long   gris_oscuro, purpura;
+char            file_open[1024];
+Time            old_time;
 
 void            initUi();
 void            closeUi();

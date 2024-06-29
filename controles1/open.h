@@ -3,12 +3,16 @@
 
 #include "ui.h"
 
+#define MAX_BTN_OPEN 2
+
 //
 // Variables
 //
-int     max_et;
-char    ruta[1024];
-int     fila_seleccionada;
+int         max_et;
+char        ruta[1024];
+char        archivo[1024];
+int         fila_seleccionada;
+DatosBoton  btn_open[2];
 
 
 //
@@ -24,9 +28,14 @@ void        pintaLabels();
 void        pintaTabla();
 void        pintaBotones();
 void        closeOpen();
-void        openClick(XEvent ev);
+void        openButtonPress(XEvent ev);
+void        openButtonRelease(XEvent ev);
+void        openDoubleClick(XEvent ev);
+
 void        tablaClick(int fila);
-void        tablaDoubleClick(XEvent ev);
+void        tablaDoubleClick(int fila);
+void        btnACeptarClick();
+void        btnCancelarClick();
 
 DatosDir    getListado(char *ruta);
 

@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1719599387 source:/home/alberto/programacion/2024/src/codeblock/xlib/controles1/main.c
+1719690983 source:/home/alberto/programacion/2024/src/codeblock/xlib/controles1/main.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
@@ -9,7 +9,7 @@
 	"ui.h"
 	"open.h"
 
-1719565945 /home/alberto/programacion/2024/src/codeblock/xlib/controles1/ui.h
+1719690005 /home/alberto/programacion/2024/src/codeblock/xlib/controles1/ui.h
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
@@ -19,19 +19,19 @@
 	<X11/Xatom.h>
 	<Imlib2.h>
 
-1719512564 source:/home/alberto/programacion/2024/src/codeblock/xlib/controles1/ui.c
+1719690282 source:/home/alberto/programacion/2024/src/codeblock/xlib/controles1/ui.c
 	<stdio.h>
 	<string.h>
 	<time.h>
 	"ui.h"
 	"open.h"
 
-1719603461 source:/home/alberto/programacion/2024/src/codeblock/xlib/controles1/open.c
+1719691913 source:/home/alberto/programacion/2024/src/codeblock/xlib/controles1/open.c
 	<dirent.h>
 	<unistd.h>
 	"open.h"
 	"ui.h"
 
-1719602907 /home/alberto/programacion/2024/src/codeblock/xlib/controles1/open.h
+1719690911 /home/alberto/programacion/2024/src/codeblock/xlib/controles1/open.h
 	"ui.h"
 

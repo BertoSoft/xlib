@@ -12,6 +12,7 @@
 void eventoKeyPress(XEvent ev);
 void eventoExposure(XEvent ev);
 void eventoButtonPress(XEvent ev);
+void eventoButtonRelease(XEvent ev);
 void eventoFocusIn(XEvent ev);
 void eventoFocusOut(XEvent ev);
 void eventoConfigureNotify(XEvent ev);
@@ -44,6 +45,9 @@ int main(){
                     break;
                 case ButtonPress:
                     eventoButtonPress(ev);
+                    break;
+                case ButtonRelease:
+                    eventoButtonRelease(ev);
                     break;
                 case FocusIn:
                     eventoFocusIn(ev);
@@ -106,6 +110,18 @@ void eventoExposure(XEvent ev){
 }
 
 void eventoButtonPress(XEvent ev){
+    Time    new_time;
+    int     is_double_click = False;
+
+    //
+    // En primer lugar comprobamos si estamos ante un DoubleClick
+    //
+    new_time = ev.xbutton.time;
+
+    if((new_time - old_time) < 200){
+        is_double_click = True;
+    }
+    old_time = new_time;
 
     //
     // Si w[0].is_enabled = false y pinchamo en cualeuier parte de w[0], traemos al frente getWindowsActiva()
@@ -131,8 +147,21 @@ void eventoButtonPress(XEvent ev){
     //
     // Si el foco esta en open lo mandamos a openClick()
     //
+    if(ev.xbutton.window == open.id && !is_double_click){
+        openButtonPress(ev);
+    }
+    else if(ev.xbutton.window == open.id && is_double_click){
+        openDoubleClick(ev);
+    }
+}
+
+void eventoButtonRelease(XEvent ev){
+
+    //
+    // Si el foco esta en open lo mandamos a openButtonRelease()
+    //
     if(ev.xbutton.window == open.id){
-        openClick(ev);
+        openButtonRelease(ev);
     }
 }
 

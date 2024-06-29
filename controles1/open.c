@@ -56,7 +56,9 @@ void initOpen(){
 }
 
 void initControles(){
-    char    ruta_actual[1024];
+    char        ruta_actual[1024];
+    int         x, y, ancho, alto;
+    XFontStruct *xfs = XLoadQueryFont(dpy, FONT_N_B);
 
     //
     // Obtenemos la ruta inicial del programa y la copiamos en ruta, esta luego puede cambiar
@@ -70,6 +72,28 @@ void initControles(){
     // Fila_seleccionada = -1;
     //
     fila_seleccionada = -1;
+
+    //
+    // Archivo = nulo
+    //
+    archivo[0] = '\0';
+
+    //
+    // Creamos los botones
+    //
+    x       = open.ancho - 350;
+    y       = open.alto -65;
+    ancho   = 150;
+    alto    = 40;
+
+    btn_open[0] = crearBoton(open.id, x, y, ancho, alto, xfs, "Cancelar", NULL);
+
+    x       = open.ancho - 175;
+    y       = open.alto -65;
+    ancho   = 150;
+    alto    = 40;
+
+    btn_open[1] = crearBoton(open.id, x, y, ancho, alto, xfs, "Aceptar", NULL);
 }
 
 void showOpen(){
@@ -83,7 +107,7 @@ void pintaOpen(){
 
     pintaLabels();
     pintaTabla();
-    //pintaBotonoes();
+    pintaBotones();
 
 }
 
@@ -92,13 +116,24 @@ void pintaLabels(){
     int         x, y, ancho, alto;
     char        msg[1024];
 
+
+    //
+    //
+    //
     xfs = XLoadQueryFont(dpy, FONT_N_B);
-    sprintf(msg,"Nombre del archivo ");
+    sprintf(msg,"Archivo : ");
+    strcat(msg, ruta);
+    if(strlen(ruta) > 1){
+        strcat(msg, "/");
+    }
+    strcat(msg, archivo);
+
     x       = 25;
     y       = 50;
-    ancho   = 195;
+    ancho   = open.ancho - 55;
     alto    = 25;
 
+    XClearArea(dpy, open.id, x, y -20, ancho, alto, False);
     setTexto(open.id, open.gc, msg, xfs, open.color, x, y, ancho, alto);
 
 }
@@ -115,7 +150,7 @@ void pintaTabla(){
     x       = 25;
     y       = 65;
     ancho   = open.ancho - 50;
-    alto    = open.alto -200;
+    alto    = open.alto -175;
 
     //
     // Dibujamos el cuadro
@@ -171,7 +206,7 @@ void pintaTabla(){
     }
 
     //
-    // Ahorra miramos si hay seleccion
+    // Ahorra miramos si hay seleccion, si es asi la presentamos
     //
     if(fila_seleccionada >= 0){
         x       = 27;
@@ -181,6 +216,8 @@ void pintaTabla(){
 
         XSetForeground(dpy, open.gc, amarillo);
         XFillRectangle(dpy, open.id, open.gc, x, y, ancho, alto);
+        strcpy(archivo, listado[fila_seleccionada]);
+        pintaLabels();
     }
 
     //
@@ -192,13 +229,31 @@ void pintaTabla(){
     ancho   = open.ancho -75;
     alto    = 25;
 
-    while(i <= num_lineas_visibles){
+    while(i < num_lineas_visibles){
         setTexto(open.id, open.gc, listado[i], xfs, open.color, x, y + (int) (i * 25), ancho, alto);
         i++;
     }
 }
 
 void pintaBotones(){
+    int i;
+
+    i = 0;
+    while(i < MAX_BTN_OPEN){
+        setUnClick(dpy, open.id, open.gc, btn_open[i].x, btn_open[i].y, btn_open[i].ancho, btn_open[i].alto);
+
+        setTexto(open.id,
+                 open.gc,
+                 btn_open[i].texto,
+                 btn_open[i].xfs,
+                 btn_open[i].color,
+                 btn_open[i].x +40,
+                 btn_open[i].y +25,
+                 btn_open[i].ancho -50,
+                 btn_open[i].alto -25
+                 );
+        i++;
+    }
 
 }
 
@@ -226,10 +281,11 @@ void closeOpen(){
     pintaUi();
 }
 
-void openClick(XEvent ev){
+void openButtonPress(XEvent ev){
     int x1, x2, y1, y2;
     int x,y;
     int i, fila, max_filas;
+    int opt;
 
     x = ev.xbutton.x;
     y = ev.xbutton.y;
@@ -240,7 +296,7 @@ void openClick(XEvent ev){
     x1          = 25;
     x2          = 25 + open.ancho -50;
     y1          = 65;
-    y2          = 65 + open.alto -200;
+    y2          = 65 + open.alto -175;
     fila        = -1;
     max_filas   = (int)((y2 - y1)/ 25);
     i           = 0;
@@ -274,15 +330,167 @@ void openClick(XEvent ev){
     //
     // Si fila > 0 , llamamos a tablaClick();
     //
-    if(fila >= 0){
+    if(fila >= 0 ){
         tablaClick(fila);
     }
 
     //
-    // Si la pulsacion es en el boton
+    // Si la pulsacion es en los botones obtenemos el boton pulsado y lo clickeamos, solo clickearlo si hay seleccion
     //
+    i   = 0;
+    opt = -1;
+    while(i < MAX_BTN_OPEN){
+        x1 = btn_open[i].x;
+        x2 = btn_open[i].x + btn_open[i].ancho;
+        y1 = btn_open[i].y;
+        y2 = btn_open[i].y + btn_open[i].alto;
+
+        if(x1 < x && x < x2){
+            if(y1 < y && y < y2){
+                opt = i;
+                i = MAX_BTN_OPEN;
+            }
+        }
+        i++;
+    }
+
+    if(opt == 0){
+       setClick(
+                dpy,
+                open.id,
+                open.gc,
+                btn_open[0].x,
+                btn_open[0].y,
+                btn_open[0].ancho,
+                btn_open[0].alto
+                );
+    }
+    if(fila_seleccionada >= 0 && opt == 1){
+        setClick(
+                dpy,
+                open.id,
+                open.gc,
+                btn_open[1].x,
+                btn_open[1].y,
+                btn_open[1].ancho,
+                btn_open[1].alto
+                );
+    }
+
+}
+
+void openButtonRelease(XEvent ev){
+    int opt = -1;
+    int i;
+    int x1, x2, y1, y2;
+    int x,y;
+
+    //
+    // Obtenemos el x e y de la pulsacion
+    //
+    x = ev.xbutton.x;
+    y = ev.xbutton.y;
+
+    //
+    // Si la pulsacion es en los botones obtenemos el boton pulsado
+    //
+    i = 0;
+    while(i < MAX_BTN_OPEN){
+        x1 = btn_open[i].x;
+        x2 = btn_open[i].x + btn_open[i].ancho;
+        y1 = btn_open[i].y;
+        y2 = btn_open[i].y + btn_open[i].alto;
+
+        if(x1 < x && x < x2){
+            if(y1 < y && y < y2){
+                opt = i;
+                i = MAX_BTN_OPEN;
+            }
+        }
+        i++;
+    }
+
+    if(opt == 0){
+        setUnClick(
+                    dpy,
+                    open.id,
+                    open.gc,
+                    btn_open[0].x,
+                    btn_open[0].y,
+                    btn_open[0].ancho,
+                    btn_open[0].alto
+                    );
+
+        btnCancelarClick();
+    }
+    else if( fila_seleccionada >= 0 && opt == 1){
+        setUnClick(
+                    dpy,
+                    open.id,
+                    open.gc,
+                    btn_open[1].x,
+                    btn_open[1].y,
+                    btn_open[1].ancho,
+                    btn_open[1].alto
+                    );
+
+        btnACeptarClick();
+    }
 
 
+}
+
+void openDoubleClick(XEvent ev){
+    int x, y;
+    int x1, x2, y1, y2;
+    int i, fila, max_filas;
+
+    x = ev.xbutton.x;
+    y = ev.xbutton.y;
+
+    //
+    // Si la pulsacion es en la tabla obtenemos la fila seleccionada
+    //
+    x1          = 25;
+    x2          = 25 + open.ancho -50;
+    y1          = 65;
+    y2          = 65 + open.alto -175;
+    fila        = -1;
+    max_filas   = (int)((y2 - y1)/ 25);
+    i           = 0;
+
+    //
+    // Miramos si esta en la tabla
+    //
+    if(x1 < x && x < x2){
+        if(y1 < y && y < y2){
+
+            //
+            //Estamos dentro de la tabla buscamos la fila
+            //
+            y2 = y1 + 25;
+            while(i < max_filas){
+                if(y1 < y && y < y2){
+
+                    //
+                    // Tenemos la fila terminamos
+                    //
+                    fila = i;
+                    i = max_filas;
+                }
+                y1 = y2;
+                y2 = y1 + 25;
+                i++;
+            }
+        }
+    }
+
+    //
+    // Si fila > 0 , llamamos a tablaClick();
+    //
+    if(fila >= 0 ){
+        tablaDoubleClick(fila);
+    }
 }
 
 void tablaClick(int fila){
@@ -291,18 +499,115 @@ void tablaClick(int fila){
     pintaTabla();
 }
 
-void tablaDoubleClick(XEvent ev){
+void tablaDoubleClick(int fila){
+
+    btnACeptarClick();
+}
+
+void btnACeptarClick(){
+    char    msg[1024];
+    int     i;
+
+    //
+    // Si estamos ante un archivo
+    //
+    if(fila_seleccionada >= 0 && archivo[strlen(archivo) -1] != '/'){
+        strcpy(msg, ruta);
+        strcat(msg, "/");
+        strcat(msg, archivo);
+        strcpy(file_open, msg);
+        closeOpen();
+    }
+    //
+    // Si estamos ante un directorio
+    //
+    else if(fila_seleccionada >= 0 && archivo[strlen(archivo) -1] == '/'){
+
+        //
+        // Si es ./, no hacemos nada, borramos la seleccion y repintamos
+        //
+        if(strcmp(archivo, "./") == 0){
+            fila_seleccionada = -1;
+            pintaTabla();
+        }
+        //
+        // Si es ../ , bajamos un nivel
+        //
+        else if(strcmp(archivo, "../") == 0){
+            strcpy(msg, ruta);
+            i = strlen(msg);
+            msg[strlen(msg) -1] = '\0';
+            while(i >= 0){
+                if(msg[i] == '/'){
+                    msg[i] = '\0';
+                    i = 0;
+                }
+                else{
+                    msg[i] = '\0';
+                }
+                i--;
+            }
+            strcpy(ruta, msg);
+            fila_seleccionada = -1;
+            archivo[0] = '\0';
+            pintaOpen();
+        }
+        //
+        // cualquier otro caso cambiamos rutay repintamos
+        //
+        else{
+            strcpy(msg, ruta);
+            strcat(msg, "/");
+            strcat(msg, archivo);
+            msg[strlen(msg) -1] = '\0';
+            strcpy(ruta, msg);
+            fila_seleccionada = -1;
+            archivo[0] = '\0';
+            pintaOpen();
+        }
+
+    }
+    //
+    // Cualquier otro caso, que no haya seleccion
+    //
+    else{
+        fila_seleccionada   = -1;
+        archivo[0]          = '\0';
+        ruta[0]             = '\0';
+    }
+
+
+}
+
+void btnCancelarClick(){
+
+    //
+    // Colocamos seleccion = -1, y archivo = \0 y ruta =\0 y cerramos
+    //
+    fila_seleccionada   = -1;
+    archivo[0]          = '\0';
+    ruta[0]             = '\0';
+
+    closeOpen();
 
 }
 
 DatosDir getListado(char *ruta){
     DatosDir        listado;
-    DIR             *pDir = opendir(ruta);
+    DIR             *pDir;
     struct dirent   *dp;
+
+    //
+    // Si leng ruta == 0
+    //
+    if(strlen(ruta) == 0){
+        sprintf(ruta, "/");
+    }
 
     //
     // No se puede leer el directorio, devolvemos nulo
     //
+    pDir = opendir(ruta);;
     if(!pDir){
         listado.num_archivos    = -1;
         listado.num_directorios = -1;
