@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1719690983 source:/home/alberto/programacion/2024/src/codeblock/xlib/controles1/main.c
+1720290069 source:/home/alberto/programacion/2024/src/codeblock/xlib/controles1/main.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
@@ -8,30 +8,39 @@
 	<X11/Xatom.h>
 	"ui.h"
 	"open.h"
+	"save.h"
 
-1719690005 /home/alberto/programacion/2024/src/codeblock/xlib/controles1/ui.h
+1720290069 /home/alberto/programacion/2024/src/codeblock/xlib/controles1/ui.h
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
 	<time.h>
+	<dirent.h>
+	<unistd.h>
+	<time.h>
+	<sys/stat.h>
 	<X11/Xlib.h>
 	<X11/Xutil.h>
+	<X11/XKBlib.h>
 	<X11/Xatom.h>
 	<Imlib2.h>
 
-1719690282 source:/home/alberto/programacion/2024/src/codeblock/xlib/controles1/ui.c
-	<stdio.h>
-	<string.h>
-	<time.h>
+1720287356 source:/home/alberto/programacion/2024/src/codeblock/xlib/controles1/ui.c
 	"ui.h"
 	"open.h"
+	"save.h"
 
-1719691913 source:/home/alberto/programacion/2024/src/codeblock/xlib/controles1/open.c
-	<dirent.h>
-	<unistd.h>
+1720034406 source:/home/alberto/programacion/2024/src/codeblock/xlib/controles1/open.c
 	"open.h"
 	"ui.h"
 
-1719690911 /home/alberto/programacion/2024/src/codeblock/xlib/controles1/open.h
+1719861041 /home/alberto/programacion/2024/src/codeblock/xlib/controles1/open.h
+	"ui.h"
+
+1720293830 source:/home/alberto/programacion/2024/src/codeblock/xlib/controles1/save.c
+	"save.h"
+	"ui.h"
+
+1720290974 /home/alberto/programacion/2024/src/codeblock/xlib/controles1/save.h
 	"ui.h"
 

@@ -8,7 +8,6 @@
 //
 // Variables
 //
-int         max_et;
 char        ruta[1024];
 char        archivo[1024];
 int         fila_seleccionada;
@@ -37,6 +36,5 @@ void        tablaDoubleClick(int fila);
 void        btnACeptarClick();
 void        btnCancelarClick();
 
-DatosDir    getListado(char *ruta);
 
 #endif // OPEN_H_INCLUDED

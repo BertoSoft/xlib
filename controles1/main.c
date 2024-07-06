@@ -8,6 +8,7 @@
 
 #include "ui.h"
 #include "open.h"
+#include "save.h"
 
 void eventoKeyPress(XEvent ev);
 void eventoExposure(XEvent ev);
@@ -44,10 +45,14 @@ int main(){
                     eventoKeyPress(ev);
                     break;
                 case ButtonPress:
-                    eventoButtonPress(ev);
+                    if(ev.xbutton.button == 1){
+                        eventoButtonPress(ev);
+                    }
                     break;
                 case ButtonRelease:
-                    eventoButtonRelease(ev);
+                    if(ev.xbutton.button == 1){
+                        eventoButtonRelease(ev);
+                    }
                     break;
                 case FocusIn:
                     eventoFocusIn(ev);
@@ -96,6 +101,18 @@ void eventoKeyPress(XEvent ev){
             closeOpen();
         }
     }
+
+    //
+    // Si pulsamos una tecla en save, y no es ESC, la procesamos
+    //
+    if(ev.xfocus.window == save.id){
+        if(ev.xkey.keycode == ESC){
+            closeSave();
+        }
+        else{
+            saveKeyPress(ev);
+        }
+    }
 }
 
 void eventoExposure(XEvent ev){
@@ -106,6 +123,10 @@ void eventoExposure(XEvent ev){
 
     if(ev.xfocus.window == open.id){
         pintaOpen();
+    }
+
+    if(ev.xfocus.window == save.id){
+        pintaSave();
     }
 }
 
@@ -124,7 +145,7 @@ void eventoButtonPress(XEvent ev){
     old_time = new_time;
 
     //
-    // Si w[0].is_enabled = false y pinchamo en cualeuier parte de w[0], traemos al frente getWindowsActiva()
+    // Si w[0].is_enabled = false y pinchamo en cualquier parte de w[0], traemos al frente getWindowsActiva()
     //
     if(ev.xbutton.window == w[1].id ||
        ev.xbutton.window == w[2].id ||
@@ -153,6 +174,16 @@ void eventoButtonPress(XEvent ev){
     else if(ev.xbutton.window == open.id && is_double_click){
         openDoubleClick(ev);
     }
+
+    //
+    // Si el foco esta en save lo mandamos a saveButtonPress()
+    //
+    if(ev.xbutton.window == save.id && !is_double_click){
+        saveButtonPress(ev);
+    }
+    else if(ev.xbutton.window == save.id && is_double_click){
+        saveDoubleClick(ev);
+    }
 }
 
 void eventoButtonRelease(XEvent ev){
@@ -162,6 +193,13 @@ void eventoButtonRelease(XEvent ev){
     //
     if(ev.xbutton.window == open.id){
         openButtonRelease(ev);
+    }
+
+    //
+    // Si el foco esta en save lo mandamos a openButtonRelease()
+    //
+    if(ev.xbutton.window == save.id){
+        saveButtonRelease(ev);
     }
 }
 
@@ -205,6 +243,13 @@ void eventoClientMessage(XEvent ev){
     //
     if(ev.xclient.window == open.id && ev.xclient.data.l[0] == cerrar_ventana){
         closeOpen();
+    }
+
+    //
+    // Si se presiona el boton x de la ventana save cerramos esta ventana
+    //
+    if(ev.xclient.window == save.id && ev.xclient.data.l[0] == cerrar_ventana){
+        closeSave();
     }
 
 }

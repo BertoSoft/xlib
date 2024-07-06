@@ -5,12 +5,19 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <dirent.h>
+#include <unistd.h>
+#include <time.h>
+#include <sys/stat.h>
+
 
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include <X11/XKBlib.h>
 #include <X11/Xatom.h>
 #include <Imlib2.h>
+
 
 #define TITULO "Controles V 1.0"
 
@@ -64,6 +71,7 @@ typedef struct{
 }DatosWindow;
 
 typedef struct{
+    int             id;
     Window          padre;
     int             x;
     int             y;
@@ -78,6 +86,7 @@ typedef struct{
 }DatosBoton;
 
 typedef struct{
+    int             id;
     Window          padre;
     int             x;
     int             y;
@@ -88,6 +97,7 @@ typedef struct{
     char            msg_visual[1024];
     int             is_enabled;
     int             is_focused;
+    int             is_selected;
     unsigned long   color;
     unsigned long   back_color;
 }DatosEt;
@@ -115,20 +125,23 @@ char    archivo[1024][1024];
 //
 Display         *dpy;
 int             scr;
-DatosWindow     w[4], open;
+DatosWindow     w[4], open, save;
 DatosBoton      btn[MAX_MENU];
 Atom            cerrar_ventana;
 unsigned long   blanco, negro;
-unsigned long   azul, azure, rojo;
-unsigned long   amarillo, gris, gris_claro;
+unsigned long   azul, azure, rojo, salmon, naranja;
+unsigned long   amarillo, gris, gris_claro, marron;
 unsigned long   gris_oscuro, purpura;
 char            file_open[1024];
+char            msg_barra_inferior[1024];
 Time            old_time;
 
 void            initUi();
 void            closeUi();
 void            resizeUi(XEvent ev);
 void            pintaUi();
+void            pintaGrafica();
+void            pintaDatos();
 void            menuClick(XEvent ev);
 int             getMenuPulsado(XEvent ev);
 
@@ -136,14 +149,19 @@ DatosWindow     crearVentana(Window padre, int x, int y, int ancho, int alto, un
 DatosBoton      crearBoton(Window padre, int x, int y, int ancho, int alto, XFontStruct *xfs, char *msg, XImage *img);
 DatosEt         crearEditText(Window padre, int x, int y, int ancho, int alto, XFontStruct *xfs, char *msg, unsigned long color, unsigned long back_color);
 void            cerrarVentana(DatosWindow dww);
+void            guardarDatos(char *p_ruta_archivo);
 unsigned long   colorPorNombre( Display *dis, char *nombre );
 void            setUnClick(Display *d, Window w, GC gc, int x, int y, int ancho, int alto);
 void            setClick(Display *d, Window w, GC gc, int x, int y, int ancho, int alto);
+void            setCuadro(Display *d, Window w, GC gc, unsigned long color, int x, int y, int ancho, int alto);
 void            setTexto(Window w, GC gc, char *msg, XFontStruct *xfs, unsigned long color, int x0, int y0, int ancho, int alto);
+void            setTextoEditText(DatosEt *et, char *pMsg);
 void            setFechaHora();
 void            setActiveWindow(Window w);
 XImage          *loadImagen(Display *display, Window w, char *ruta);
 Window          getWindowsActiva();
 DatosStates     getWindowStates(Window w);
+DatosDir        getDir(char *ruta);
+
 
 #endif // UI_H_INCLUDED

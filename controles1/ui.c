@@ -1,16 +1,17 @@
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
-
 
 #include "ui.h"
 #include "open.h"
+#include "save.h"
 
 
 
 void initUi(){
     int         i;
     XFontStruct *xfs;
+    char        ruta_actual[1024];
+    DatosDir    datos_dir;
+    int         is_imagenes = False;
+    int         is_data     = False;
     char        *icono[] = {
                             "./imagenes/abrir96.jpeg",
                             "./imagenes/guardar96.jpeg",
@@ -20,6 +21,46 @@ void initUi(){
                             "./imagenes/salir96.jpeg"
                             };
 
+    //
+    // Antes de nada , obtenemos la ruta_ejecucion, si hay error salimos
+    //
+    if(getcwd(ruta_actual, sizeof(ruta_actual)) == NULL){
+        printf("Se ha producido un error...");
+        exit(1);
+    }
+
+    //
+    // Obtenemos un dir de la ruta ejecucion y comprobamos que existe el directorio imagenes, y el data
+    //
+    datos_dir = getDir(ruta_actual);
+    i = 0;
+    while(i < datos_dir.num_directorios){
+        if(strcmp(datos_dir.directorio[i], "imagenes") == 0){
+            is_imagenes = True;
+        }
+        if(strcmp(datos_dir.directorio[i], "data") == 0){
+            is_data = True;
+        }
+        i++;
+    }
+
+    //
+    // Si no existe el directorio imagenes , Salimos
+    //
+    if(!is_imagenes){
+        printf("\nNo se encuentra el directorio imagenes...\n");
+        exit(1);
+    }
+
+    //
+    // Si no existe el directorio data, lo creamos, si no podemos , salimos
+    //
+    if(!is_data){
+        if(mkdir("data", 0777) != 0){
+            printf("\nImposible crear el directorio data...\n");
+            exit(1);
+        }
+    }
 
     //
     //  Iniciamos los valores
@@ -34,17 +75,15 @@ void initUi(){
     //
     azul        = colorPorNombre(dpy, "blue");
     purpura     = colorPorNombre(dpy, "medium purple");
-    azure       = colorPorNombre(dpy, "azure");
+    salmon      = colorPorNombre(dpy, "salmon1");
+    naranja     = colorPorNombre(dpy, "OrangeRed");
+    marron      = colorPorNombre(dpy, "brown");
+    azure       = colorPorNombre(dpy, "azure4");
     rojo        = colorPorNombre(dpy, "red");
     amarillo    = colorPorNombre(dpy, "yellow");
     gris        = colorPorNombre(dpy, "gray");
     gris_oscuro = colorPorNombre(dpy, "DarkSlateGray");
     gris_claro  = colorPorNombre(dpy, "LightGray");
-
-    //
-    // Colocamos el contador de ets en cero
-    //
-    max_et = 0;
 
     //
     // Establecemos file_open en nulo
@@ -57,6 +96,12 @@ void initUi(){
     old_time = time(NULL);
 
     //
+    // Estableciendo el texto de la barra inferior
+    //
+    sprintf(msg_barra_inferior,"%s", TITULO);
+
+
+    //
     // Definimos los Atoms
     //
     cerrar_ventana      = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
@@ -66,8 +111,8 @@ void initUi(){
     //
     w[0] = crearVentana(DefaultRootWindow(dpy), 0, 0, DisplayWidth(dpy, scr), DisplayHeight(dpy, scr), negro, gris_claro);
     w[1] = crearVentana(w[0].id, w[0].ancho -103, 1, 100, w[0].alto -37, negro, gris);
-    w[2] = crearVentana(w[0].id, 1, 1, w[0].ancho -107, w[0].alto -37, negro, gris_claro);
-    w[3] = crearVentana(w[0].id, 0, w[0].alto -37, w[0].ancho -4, 44, negro, gris);
+    w[2] = crearVentana(w[0].id, 1, 1, w[0].ancho -107, w[0].alto -37, naranja, gris_claro);
+    w[3] = crearVentana(w[0].id, 0, w[0].alto -37, w[0].ancho -4, 44, azul, gris);
 
     //
     // Establecemos las propiedades de la ventana scr
@@ -88,7 +133,7 @@ void initUi(){
     i   = 0;
     xfs = XLoadQueryFont(dpy, FONT_N_B);
     while(i < MAX_MENU){
-        btn[i] = crearBoton(w[1].id, 4, 4 +(i * ANCHO_BTN_MENU), 92, 92, xfs, "", loadImagen(dpy, w[1].id, icono[i]));
+        btn[i] = crearBoton(w[1].id, 3, 3 +(i * ANCHO_BTN_MENU), 94, 94, xfs, "", loadImagen(dpy, w[1].id, icono[i]));
         i++;
     }
 
@@ -139,7 +184,9 @@ void resizeUi(XEvent ev){
 }
 
 void pintaUi(){
-    int i;
+    int         i;
+    int         x, y, ancho, alto;
+    XFontStruct *xfs = XLoadQueryFont(dpy, FONT_N_B);
 
     //
     // Recolocamos todas las ventanas
@@ -174,7 +221,6 @@ void pintaUi(){
         else{
             setUnClick(dpy, w[1].id, w[1].gc, btn[i].x, btn[i].y, btn[i].ancho, btn[i].alto);
         }
-
         i++;
     }
 
@@ -184,9 +230,119 @@ void pintaUi(){
     setClick(dpy, w[3].id, w[3].gc, 2, 2, (int) (w[3].ancho * 0.7), w[3].alto - 4);                             //  70%
     setClick(dpy, w[3].id, w[3].gc, (int) (w[3].ancho * 0.7), 2, (int) (w[3].ancho * 0.2), w[3].alto - 4);      //  20%
     setClick(dpy, w[3].id, w[3].gc, (int) (w[3].ancho * 0.9), 2, (int) (w[3].ancho * 0.1), w[3].alto -4);       //  10%
+
     setFechaHora();
 
+    //
+    // Ponemos el mensaje, como mucho hasta el 0,6 * ancho
+    //
+    x       = 50;
+    y       = (int) (w[3].alto / 2) + 5;
+    ancho   = (int) (w[3].ancho * 0.7);
+    alto    = w[3].alto;
+
+    XSetForeground(dpy, w[3].gc, w[3].back_color);
+    XFillRectangle(dpy, w[3].id, w[3].gc, 4, 4, ancho -6, 32);
+    setTexto(w[3].id, w[3].gc, msg_barra_inferior, xfs, w[3].color, x, y, ancho, alto);
+
+    //
+    // Pintamos la parte de la funcion
+    //
+    pintaGrafica();
+
+    //
+    // Pintamos la parte de los datos
+    //
+    pintaDatos();
+
+    //
+    // Esperamosa que se vacie el buffer grafico
+    //
     XFlush(dpy);
+}
+
+void pintaGrafica(){
+    int         x, y, ancho, alto;
+    int         x0, y0;
+    XFontStruct *xfs = XLoadQueryFont(dpy, FONT_N_B);
+    char        msg[1024];
+
+    x0 = (int) (w[2].ancho / 2);
+    y0 = (int) (w[2].alto / 2);
+
+    //
+    // Pintamos el recuadro del preview
+    //
+    x       = 50;
+    y       = 250;
+    ancho   = (int) (x0 -50);
+    alto    = (int) (y0 + 200);
+    sprintf(msg, "Previsualizacion de la funcion...");
+    setTexto(w[2].id, w[2].gc, msg, xfs, w[2].color, x, y -15, ancho, 25);
+    setCuadro(dpy, w[2].id, w[2].gc, negro, x, y, ancho, alto);
+
+
+
+}
+
+void pintaDatos(){
+    int         x, y, ancho, alto;
+    int         x0, y0;
+    XFontStruct *xfs;
+    char        msg[1024];
+
+    char tipo_funcion[]="";
+    char lim_inf[]="";
+    char lim_sup[] ="";
+    char epsilon[]="";
+    char ultima_modificacio[]="";
+    char funcion[]="";
+
+    x0 = (int) (w[2].ancho / 2);
+    y0 = (int) (w[2].alto / 2);
+
+    //
+    // Pintamos la funcion
+    //
+    xfs = XLoadQueryFont(dpy, FONT_G);
+
+    ancho   = XTextWidth(xfs, funcion, strlen(funcion));
+    alto    = 100;
+    x       = (int)((w[2].ancho / 2) - (ancho / 2));
+    y       = 125;
+    setTexto(w[2].id, w[2].gc, funcion, xfs, marron, x, y, ancho, alto);
+
+    //
+    // Pintamos los datos
+    //
+    xfs = XLoadQueryFont(dpy, FONT_N_B);
+
+    x       = x0 +125;
+    y       = (int) ((y0 +200) / 2) + 100;
+    ancho   = (int) (x0 / 2) -75;
+    alto    = 25;
+
+    sprintf(msg, "Tipo de Funcion.");
+    setTexto(w[2].id, w[2].gc, msg, xfs, w[2].color, x, y, ancho, alto);
+    sprintf(msg, "Limite Inferior.");
+    setTexto(w[2].id, w[2].gc, msg, xfs, w[2].color, x, y +50, ancho, alto);
+    sprintf(msg, "Limite Superior.");
+    setTexto(w[2].id, w[2].gc, msg, xfs, w[2].color, x, y +100, ancho, alto);
+    sprintf(msg, "Epsilon.");
+    setTexto(w[2].id, w[2].gc, msg, xfs, w[2].color, x, y +150, ancho, alto);
+    sprintf(msg, "Fecha Ultima Modificacion.");
+    setTexto(w[2].id, w[2].gc, msg, xfs, w[2].color, x, y +200, ancho, alto);
+
+    x       = x0 + (int) (x0 / 2);
+    y       = (int) ((y0 +200) / 2) + 100;
+    ancho   = (int) (x0 / 2) -75;
+    alto    = 25;
+
+    setTexto(w[2].id, w[2].gc, tipo_funcion, xfs, w[2].color, x, y, ancho, alto);
+    setTexto(w[2].id, w[2].gc, lim_inf, xfs, w[2].color, x, y +50, ancho, alto);
+    setTexto(w[2].id, w[2].gc, lim_sup, xfs, w[2].color, x, y +100, ancho, alto);
+    setTexto(w[2].id, w[2].gc, epsilon, xfs, w[2].color, x, y +150, ancho, alto);
+    setTexto(w[2].id, w[2].gc, ultima_modificacio, xfs, w[2].color, x, y +200, ancho, alto);
 }
 
 void closeUi(){
@@ -213,13 +369,15 @@ void menuClick(XEvent ev){
     switch(opt){
         case 0:
             if(!open.is_enabled){
+                sprintf(msg_barra_inferior,"Abriendo un archivo de datos...");
                 showOpen();
             }
             break;
         case 1:
-            if(opt == 3){
-
-            };
+             if(!save.is_enabled){
+                sprintf(msg_barra_inferior,"Guardando un archivo de datos...");
+                showSave();
+            }
             break;
         case 2:
             break;
@@ -336,11 +494,6 @@ DatosEt crearEditText(Window padre, int x, int y, int ancho, int alto, XFontStru
     DatosEt et;
 
     //
-    // Numero de ets en este formulario
-    //
-    max_et ++;
-
-    //
     // Relleno los datos
     //
     et.padre        = padre;
@@ -349,18 +502,27 @@ DatosEt crearEditText(Window padre, int x, int y, int ancho, int alto, XFontStru
     et.ancho        = ancho;
     et.alto         = alto;
     et.xfs          = xfs;
+    et.color        = color;
+    et.back_color   = back_color;
     et.is_enabled   = True;
+    et.is_focused   = False;
+    et.is_selected  = False;
     strcpy(et.msg, msg);
 
     //
-    // Si solo hay uno le doy el foco
+    // Si msg > que ancho, debemos recortar msg
     //
-    if(max_et == 1){
-        et.is_focused   = True;
+    if(XTextWidth(xfs, msg, strlen(msg)) > ancho){
+
     }
     else{
-        et.is_focused   = False;
+            strcpy(et.msg_visual, msg);
+
     }
+
+
+
+
 
     return et;
 }
@@ -370,6 +532,10 @@ void cerrarVentana(DatosWindow dww){
     XFreeGC(dpy, dww.gc);
     XUnmapWindow(dpy, dww.id);
     XDestroyWindow(dpy, dww.id);
+}
+
+void guardarDatos(char *p_ruta_archivo){
+
 }
 
 void setClick(Display *d, Window w, GC gc, int x, int y, int ancho, int alto){
@@ -411,6 +577,14 @@ void setUnClick(Display *d, Window w, GC gc, int x, int y, int ancho, int alto){
 
 }
 
+void setCuadro(Display *d, Window w, GC gc, unsigned long color, int x, int y, int ancho, int alto){
+
+    XSetForeground(d, gc, color);
+    XDrawRectangle(d, w, gc, x +2, y +2, ancho -4, alto -4);
+    XDrawRectangle(d, w, gc, x, y, ancho, alto);
+
+}
+
 void setActiveWindow(Window w){
     XClientMessageEvent ev;
     Atom                ventana_activa = XInternAtom(dpy, "_NET_ACTIVE_WINDOW", True);
@@ -436,10 +610,16 @@ void setFechaHora(){
     time_t          time_actual;
     struct tm       *tm_actual;
 
+    //
+    // Obtenemos la hora actual
+    //
     time_actual = time(NULL);
     tm_actual   = localtime(&time_actual);
     xfs         = XLoadQueryFont(dpy, FONT_N_B);
 
+    //
+    // Coordenadas de la fecha ancho * 0.7
+    //
     x       = (int) (w[3].ancho * 0.7) + 10;
     y       = (int) (w[3].alto / 2) + 5;
     ancho   = (int) (w[3].ancho * 0.18);
@@ -448,8 +628,11 @@ void setFechaHora(){
     strftime(msg, 1023, "%A, %d de %B de %Y", tm_actual);
     XSetForeground(dpy, w[3].gc, w[3].back_color);
     XFillRectangle(dpy, w[3].id, w[3].gc, (int)(w[3].ancho * 0.7) + 2, 4, ancho, 46);
-    setTexto(w[3].id, w[3].gc, msg, xfs, azul, x, y, ancho, alto);
+    setTexto(w[3].id, w[3].gc, msg, xfs, w[3].color, x, y, ancho, alto);
 
+    //
+    // Coordenadas de la hora 0.9 * ancho
+    //
     x       = (int) (w[3].ancho * 0.9) + 50;
     y       = (int) (w[3].alto / 2) + 5;
     ancho   = (int) (w[3].ancho * 0.1);
@@ -458,7 +641,7 @@ void setFechaHora(){
     strftime(msg, 1023, "%X", tm_actual);
     XSetForeground(dpy, w[3].gc, w[3].back_color);
     XFillRectangle(dpy, w[3].id, w[3].gc, (int)(w[3].ancho * 0.9) + 2, 4, ancho, 46);
-    setTexto(w[3].id, w[3].gc, msg, xfs, azul, x, y, ancho, alto);
+    setTexto(w[3].id, w[3].gc, msg, xfs, w[3].color, x, y, ancho, alto);
 
 }
 
@@ -504,6 +687,64 @@ void setTexto(Window w, GC gc, char *msg, XFontStruct *xfs, unsigned long color,
     XSetFont(dpy, gc, xfs->fid);
     XSetForeground(dpy, gc, color);
     XDrawString(dpy, w, gc, x0, y0, msg, tam);
+}
+
+void setTextoEditText(DatosEt *et, char *pMsg){
+    char    msg[1024];
+    char    msg_visual[1024];
+    int     ancho_caracter, max_caracteres, ancho_texto;
+    int     i, j;
+
+    //
+    // Hacemos una copia de msg
+    //
+    strcpy(msg, pMsg);
+    strcpy(et->msg, msg);
+
+    //
+    // Si msg == ""
+    //
+    if(strlen(msg) == 0){
+        msg_visual[0] = '\0';
+    }
+    else{
+
+        //
+        // Comprobamos que coje el texto
+        //
+        ancho_texto     = XTextWidth(et->xfs, msg, strlen(msg));
+        ancho_caracter  = (int)(ancho_texto / strlen(msg));
+        max_caracteres  = (int)(et->ancho / ancho_caracter);
+
+        //
+        // Si el texto coje, lo copiamos en msg_visual
+        //
+        if(strlen(msg) <= max_caracteres){
+            strcpy(msg_visual, msg);
+        }
+        //
+        // Si el texto no coje lo recortamos
+        //
+        else{
+            msg_visual[max_caracteres] = '\0';
+            i = max_caracteres -1;
+            j = strlen(msg);
+
+            while(i >= 0){
+                msg_visual[i] = msg[j];
+                i--;
+                j--;
+            }
+        }
+    }
+
+
+
+    //
+    // copiamos msg_visual en et->msg_visual
+    //
+    strcpy(et->msg_visual, msg_visual);
+
 }
 
 XImage *loadImagen(Display *display, Window w, char *ruta){
@@ -573,6 +814,7 @@ Window getWindowsActiva(){
 
     if(w[0].is_enabled == True){ ww = w[0].id;}
     if(open.is_enabled == True){ ww = open.id;}
+    if(save.is_enabled == True){ ww = save.id;}
 
     return ww;
 }
@@ -674,6 +916,49 @@ DatosStates getWindowStates(Window w){
 
     return dStates;
 }
+
+DatosDir getDir(char *ruta){
+    DatosDir        listado;
+    DIR             *pDir;
+    struct dirent   *dp;
+
+    //
+    // Si leng ruta == 0
+    //
+    if(strlen(ruta) == 0){
+        sprintf(ruta, "/");
+    }
+
+    //
+    // No se puede leer el directorio, devolvemos nulo
+    //
+    pDir = opendir(ruta);;
+    if(!pDir){
+        listado.num_archivos    = -1;
+        listado.num_directorios = -1;
+    }
+    //
+    // se abrio el directorio, procedemos a leerlo
+    //
+    else{
+        listado.num_archivos    = 0;
+        listado.num_directorios = 0;
+        while((dp = readdir(pDir)) != NULL){
+            if(dp->d_type == 4){
+                strcpy(listado.directorio[listado.num_directorios], dp->d_name);
+                listado.num_directorios++;
+            }
+            if(dp->d_type == 8){
+                strcpy(listado.archivo[listado.num_archivos], dp->d_name);
+                listado.num_archivos++;
+            }
+        }
+    }
+
+    return listado;
+}
+
+
 
 
 

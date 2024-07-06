@@ -1,9 +1,11 @@
-#include <dirent.h>
-#include <unistd.h>
+
 
 #include "open.h"
 #include "ui.h"
 
+//
+// Funciones Graficas
+//
 void initOpen(){
     int x, y, ancho, alto;
 
@@ -20,7 +22,7 @@ void initOpen(){
     x       = (int)(DisplayWidth(dpy, scr) / 2) - (ancho / 2);
     y       = (int)(DisplayHeight(dpy, scr) / 2) -(alto / 2);
 
-    open = crearVentana(DefaultRootWindow(dpy), x, y, ancho, alto, negro, gris_claro);
+    open = crearVentana(DefaultRootWindow(dpy), x, y, ancho, alto, w[2].color, gris_claro);
 
     //
     // Establecemos las propiedades de la ventana
@@ -69,17 +71,17 @@ void initControles(){
     strcpy(ruta, ruta_actual);
 
     //
-    // Fila_seleccionada = -1;
+    // Fila_seleccionada = -1, Indica que no hay ningun archivo o directorio seleccionado;
     //
     fila_seleccionada = -1;
 
     //
-    // Archivo = nulo
+    // Nombre del Archivo = nulo
     //
     archivo[0] = '\0';
 
     //
-    // Creamos los botones
+    // Creamos los botones Cancelar y Aceptar
     //
     x       = open.ancho - 350;
     y       = open.alto -65;
@@ -116,14 +118,15 @@ void pintaLabels(){
     int         x, y, ancho, alto;
     char        msg[1024];
 
+    xfs = XLoadQueryFont(dpy, FONT_N_B);
 
     //
+    // Muestro en el label el nombre completo del archivo
     //
-    //
-    xfs = XLoadQueryFont(dpy, FONT_N_B);
     sprintf(msg,"Archivo : ");
     strcat(msg, ruta);
-    if(strlen(ruta) > 1){
+
+    if(strlen(ruta) != 1){
         strcat(msg, "/");
     }
     strcat(msg, archivo);
@@ -162,7 +165,7 @@ void pintaTabla(){
     //
     // Obtenemmos el listado del char ruta, en forma de DatosDir;
     //
-    datos_dir = getListado(ruta);
+    datos_dir = getDir(ruta);
 
     //
     // Lo ordenamos y lo recortamos si no coje
@@ -170,12 +173,19 @@ void pintaTabla(){
     num_lineas_visibles = (int)( alto / 25) -1;
 
     //
-    // Primero los directorios
+    // Primero los directorios ./ y ../ , debemos distinguir si ruta != /
     //
-    sprintf(listado[0], "./");
-    sprintf(listado[1], "../");
-    i = 2;
-    j = 0;
+    if(strcmp(ruta, "/") == 0){
+        j = 0;
+        i = 0;
+    }
+    else{
+        sprintf(listado[0], "./");
+        sprintf(listado[1], "../");
+        i = 2;
+        j = 0;
+    }
+
     while(j < datos_dir.num_directorios){
         sprintf(msg,"%s", datos_dir.directorio[j]);
         strcat(msg, "/");
@@ -206,7 +216,7 @@ void pintaTabla(){
     }
 
     //
-    // Ahorra miramos si hay seleccion, si es asi la presentamos
+    // Ahora miramos si hay seleccion, si es asi la presentamos
     //
     if(fila_seleccionada >= 0){
         x       = 27;
@@ -214,14 +224,14 @@ void pintaTabla(){
         ancho   = open.ancho - 50;
         alto    = 25;
 
-        XSetForeground(dpy, open.gc, amarillo);
+        XSetForeground(dpy, open.gc, naranja);
         XFillRectangle(dpy, open.id, open.gc, x, y, ancho, alto);
         strcpy(archivo, listado[fila_seleccionada]);
         pintaLabels();
     }
 
     //
-    // Ahora pintamos en el cuadro
+    // Ahora Mostramos el listado en el cuadro
     //
     i       = 0;
     x       = 40;
@@ -230,7 +240,7 @@ void pintaTabla(){
     alto    = 25;
 
     while(i < num_lineas_visibles){
-        setTexto(open.id, open.gc, listado[i], xfs, open.color, x, y + (int) (i * 25), ancho, alto);
+        setTexto(open.id, open.gc, listado[i], xfs, negro, x, y + (int) (i * 25), ancho, alto);
         i++;
     }
 }
@@ -260,6 +270,16 @@ void pintaBotones(){
 void closeOpen(){
 
     //
+    // Colocamos el mensaje de la barra uinferior
+    //
+    if(strlen(file_open) > 0){
+        sprintf(msg_barra_inferior, "%s", file_open);
+    }
+    else{
+        sprintf(msg_barra_inferior, "%s", TITULO);
+    }
+
+    //
     // Cerramos open
     //
     cerrarVentana(open);
@@ -281,6 +301,10 @@ void closeOpen(){
     pintaUi();
 }
 
+
+//
+// Gestion de eventos
+//
 void openButtonPress(XEvent ev){
     int x1, x2, y1, y2;
     int x,y;
@@ -493,6 +517,8 @@ void openDoubleClick(XEvent ev){
     }
 }
 
+
+
 void tablaClick(int fila){
 
     fila_seleccionada = fila;
@@ -511,11 +537,17 @@ void btnACeptarClick(){
     //
     // Si estamos ante un archivo
     //
-    if(fila_seleccionada >= 0 && archivo[strlen(archivo) -1] != '/'){
+    if(fila_seleccionada >= 0 && archivo[strlen(archivo) -1] != '/' && strlen(ruta) != 1){
         strcpy(msg, ruta);
         strcat(msg, "/");
         strcat(msg, archivo);
         strcpy(file_open, msg);
+
+        //
+        // Colocamos la ruta del archivo en la barra inferior
+        //
+        sprintf(msg_barra_inferior, "%s", file_open);
+
         closeOpen();
     }
     //
@@ -553,11 +585,13 @@ void btnACeptarClick(){
             pintaOpen();
         }
         //
-        // cualquier otro caso cambiamos rutay repintamos
+        // cualquier otro caso cambiamos ruta y repintamos
         //
         else{
             strcpy(msg, ruta);
-            strcat(msg, "/");
+            if(strlen(ruta) != 1){
+                strcat(msg, "/");
+            }
             strcat(msg, archivo);
             msg[strlen(msg) -1] = '\0';
             strcpy(ruta, msg);
@@ -591,45 +625,3 @@ void btnCancelarClick(){
     closeOpen();
 
 }
-
-DatosDir getListado(char *ruta){
-    DatosDir        listado;
-    DIR             *pDir;
-    struct dirent   *dp;
-
-    //
-    // Si leng ruta == 0
-    //
-    if(strlen(ruta) == 0){
-        sprintf(ruta, "/");
-    }
-
-    //
-    // No se puede leer el directorio, devolvemos nulo
-    //
-    pDir = opendir(ruta);;
-    if(!pDir){
-        listado.num_archivos    = -1;
-        listado.num_directorios = -1;
-    }
-    //
-    // se abrio el directorio, procedemos a leerlo
-    //
-    else{
-        listado.num_archivos    = 0;
-        listado.num_directorios = 0;
-        while((dp = readdir(pDir)) != NULL){
-            if(dp->d_type == 4){
-                strcpy(listado.directorio[listado.num_directorios], dp->d_name);
-                listado.num_directorios++;
-            }
-            if(dp->d_type == 8){
-                strcpy(listado.archivo[listado.num_archivos], dp->d_name);
-                listado.num_archivos++;
-            }
-        }
-    }
-
-    return listado;
-}
-
